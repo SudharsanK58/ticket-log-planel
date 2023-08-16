@@ -1,6 +1,15 @@
 .App {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 20px;
+  width: 100%; /* Ensuring the container takes full width */
+  margin-top: 50px; /* Introducing a top gap */
+  box-sizing: border-box; /* To ensure padding and border are included in the total height */
 }
+
 
 .App-logo {
   height: 40vmin;

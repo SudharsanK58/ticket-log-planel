@@ -17,6 +17,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 import { Alert, AlertTitle } from '@mui/material';
+import InputLabel from '@mui/material/InputLabel';
 
 function App() {
   const [tickets, setTickets] = useState({});
@@ -130,7 +131,32 @@ function App() {
                   </TableCell>
                   )}
                   <TableCell style={{ color: color , fontSize: '1.1em'}}>{key}</TableCell>
-                  <TableCell style={{ color: color , fontSize: '1.0em',width: '550px'}}>{typeof value === 'boolean' ? value.toString() : value}</TableCell>
+                  {/* <TableCell style={{ color: color , fontSize: '1.0em',width: '550px'}}>{typeof value === 'boolean' ? value.toString() : value}</TableCell> */}
+                  <TableCell style={{ color: color , fontSize: '1.0em',width: '550px'}}>
+                  {key === 'bleTxPower' ? (
+                    <Box sx={{ Width: 40 }}>
+                      <FormControl style={{width:"40%"}}>
+                        <InputLabel id="demo-simple-select-label">Validation Mode</InputLabel>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          value={value}
+                          label="Validation Mode"
+                          onChange={(event) => {
+                            // Handle the change of the select dropdown
+                            // For now, it's just logging, you might need more functionality
+                            console.log(event.target.value);
+                          }}
+                        >
+                          <MenuItem value={-4}>Ticket validation</MenuItem>
+                          <MenuItem value={0}>Long range validation</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  ) : (
+                    typeof value === 'boolean' ? value.toString() : value
+                  )}
+        </TableCell>
                 </TableRow>
               ));
             })}

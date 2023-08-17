@@ -15,10 +15,27 @@ import axios from 'axios';
 import React, { useState, useEffect, useContext } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 import { Alert, AlertTitle } from '@mui/material';
+import Chip from '@mui/material/Chip';
+
 
 function App() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true); 
+  const getStatusText = (status) => {
+    switch (status) {
+      case 0:
+        return "Expired";
+      case 1:
+        return "New Ticket";
+      case 2:
+        return "Active Ticket";
+      case 3:
+        return "Validated Ticket";
+      default:
+        return "Unknown Status";  // This can be adjusted based on your needs
+    }
+  };
+  
   const cards = [
     { name: "Ble card 1", token: "01504799-7e33-4a59-83d2-fcf7389237d6" },
     { name: "Ble card 2", token: "1855e860-c57b-4c2f-9a04-9fc4ad9ba2d0" },
@@ -134,7 +151,7 @@ function App() {
                   <TableCell>{subset.AgencyName}</TableCell>
                   <TableCell>{subset.TicketId}</TableCell>
                   <TableCell>{subset.Amount}</TableCell>
-                  <TableCell>{subset.status}</TableCell>
+                  <TableCell>{getStatusText(subset.status)}</TableCell>
                 </TableRow>
               ))
             )}

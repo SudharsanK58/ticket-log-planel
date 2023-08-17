@@ -32,6 +32,13 @@ function App() {
   const [ibeaconMinorValue, setIbeaconMinorValue] = useState('');
   const [bleDfuModeValue, setBleDfuModeValue] = useState(false);
   const [bleIbeaconModeValue, setBleIbeaconModeValue] = useState(false);
+  const [bleConnectModeValue, setBleConnectModeValue] = useState(false);
+  const [totalDeviceLogValue, setTotalDeviceLogValue] = useState(false);
+  const [sendOnlyGpsLogValue, setSendOnlyGpsLogValue] = useState(false);
+  const [buzzerEnableValue, setBuzzerEnableValue] = useState(false);
+  const [enableMultipleLightsValue, setEnableMultipleLightsValue] = useState(false);
+
+
 
 
 
@@ -61,6 +68,12 @@ function App() {
           setIbeaconMinorValue(response.data.ble.ibeaconMinor);
           setBleDfuModeValue(response.data.ble.bleDfuMode);
           setBleIbeaconModeValue(response.data.ble.bleIbeaconMode);
+          setBleConnectModeValue(response.data.ble.bleConnectMode);
+          setTotalDeviceLogValue(response.data.mqtt.totalDeviceLog);
+          setSendOnlyGpsLogValue(response.data.mqtt.sendOnlyGpsLog);
+          setBuzzerEnableValue(response.data.validation.buzzerEnable);
+          setEnableMultipleLightsValue(response.data.validation.enableMultipleLights);
+
           setLoading(false);
         }
       })
@@ -238,7 +251,87 @@ function App() {
                         <FormControlLabel value="BIBO" control={<Radio />} label="BIBO Mode" />
                       </RadioGroup>
                     </FormControl>
-                  ) : (
+                  ) : key === 'bleConnectMode' ? (
+                    <FormControl>
+                      <RadioGroup
+                        row
+                        name="bleConnectMode-radio-group"
+                        value={bleConnectModeValue ? "Not connectable" : "Connectable"}
+                        onChange={(event) => {
+                          const isNotConnectable = event.target.value === "Not connectable";
+                          setBleConnectModeValue(isNotConnectable);
+                          console.log(`The updated bleConnectMode is ${isNotConnectable}`);
+                        }}
+                      >
+                        <FormControlLabel value="Not connectable" control={<Radio />} label="Not connectable" />
+                        <FormControlLabel value="Connectable" control={<Radio />} label="Connectable" />
+                      </RadioGroup>
+                    </FormControl>
+                  ) : key === 'totalDeviceLog' ? (
+                    <FormControl>
+                      <RadioGroup
+                        row
+                        name="totalDeviceLog-radio-group"
+                        value={totalDeviceLogValue ? "Periodic logs" : "One time log"}
+                        onChange={(event) => {
+                          const isPeriodicLogs = event.target.value === "Periodic logs";
+                          setTotalDeviceLogValue(isPeriodicLogs);
+                          console.log(`The updated totalDeviceLog is ${isPeriodicLogs}`);
+                        }}
+                      >
+                        <FormControlLabel value="Periodic logs" control={<Radio />} label="Periodic logs" />
+                        <FormControlLabel value="One time log" control={<Radio />} label="One time log" />
+                      </RadioGroup>
+                    </FormControl>
+                  ): key === 'sendOnlyGpsLog' ? (
+                    <FormControl>
+                      <RadioGroup
+                        row
+                        name="sendOnlyGpsLog-radio-group"
+                        value={sendOnlyGpsLogValue ? "Only GPS log" : "Full device log"}
+                        onChange={(event) => {
+                          const isOnlyGpsLog = event.target.value === "Only GPS log";
+                          setSendOnlyGpsLogValue(isOnlyGpsLog);
+                          console.log(`The updated sendOnlyGpsLog is ${isOnlyGpsLog}`);
+                        }}
+                      >
+                        <FormControlLabel value="Only GPS log" control={<Radio />} label="Only GPS log" />
+                        <FormControlLabel value="Full device log" control={<Radio />} label="Full device log" />
+                      </RadioGroup>
+                    </FormControl>
+                  ): key === 'buzzerEnable' ? (
+                    <FormControl>
+                      <RadioGroup
+                        row
+                        name="buzzerEnable-radio-group"
+                        value={buzzerEnableValue ? "Sound mode" : "Silent mode"}
+                        onChange={(event) => {
+                          const isSoundMode = event.target.value === "Sound mode";
+                          setBuzzerEnableValue(isSoundMode);
+                          console.log(`The updated buzzerEnable mode is ${isSoundMode ? 'Sound mode' : 'Silent mode'}`);
+                        }}
+                      >
+                        <FormControlLabel value="Sound mode" control={<Radio />} label="Sound mode" />
+                        <FormControlLabel value="Silent mode" control={<Radio />} label="Silent mode" />
+                      </RadioGroup>
+                    </FormControl>
+                  ) : key === 'enableMultipleLights' ? (
+                    <FormControl>
+                      <RadioGroup
+                        row
+                        name="enableMultipleLights-radio-group"
+                        value={enableMultipleLightsValue ? "Group tickets validation" : "Single ticket validation"}
+                        onChange={(event) => {
+                          const isGroupTicket = event.target.value === "Group tickets validation";
+                          setEnableMultipleLightsValue(isGroupTicket);
+                          console.log(`The updated enableMultipleLights mode is ${isGroupTicket ? 'Group tickets validation' : 'Single ticket validation'}`);
+                        }}
+                      >
+                        <FormControlLabel value="Group tickets validation" control={<Radio />} label="Group tickets validation" />
+                        <FormControlLabel value="Single ticket validation" control={<Radio />} label="Single ticket validation" />
+                      </RadioGroup>
+                    </FormControl>
+                  ) :   (
                     typeof value === 'boolean' ? value.toString() : value
                   )}
         </TableCell>

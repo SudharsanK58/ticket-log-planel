@@ -37,6 +37,8 @@ function App() {
   const [sendOnlyGpsLogValue, setSendOnlyGpsLogValue] = useState(false);
   const [buzzerEnableValue, setBuzzerEnableValue] = useState(false);
   const [enableMultipleLightsValue, setEnableMultipleLightsValue] = useState(false);
+  const [bleName, setBleName] = useState('');
+  const [deviceTopic, setDeviceTopic] = useState('');
 
 
 
@@ -73,6 +75,9 @@ function App() {
           setSendOnlyGpsLogValue(response.data.mqtt.sendOnlyGpsLog);
           setBuzzerEnableValue(response.data.validation.buzzerEnable);
           setEnableMultipleLightsValue(response.data.validation.enableMultipleLights);
+          setBleName(response.data.ble.blename);
+          setDeviceTopic(response.data.mqtt.deviceTopic);
+
 
           setLoading(false);
         }
@@ -331,6 +336,37 @@ function App() {
                         <FormControlLabel value="Single ticket validation" control={<Radio />} label="Single ticket validation" />
                       </RadioGroup>
                     </FormControl>
+                  ) : key === 'blename' ? (
+                    <div>
+                      <TextField
+                        id="ble-name-textfield"
+                        label="BLE Name"
+                        multiline
+                        rows={1}
+                        value={bleName}
+                        inputProps={{ maxLength: 12 }}
+                        onChange={(e) => {
+                          setBleName(e.target.value);
+                          console.log(`The updated BLE name is: ${e.target.value}`);
+                        }}
+                        variant="standard"
+                      />
+                    </div>
+                  ) : key === 'deviceTopic' ? (
+                    <div>
+                      <TextField style={{width:"40%"}}
+                        id="device-topic-textfield"
+                        label="Device Topic"
+                        multiline
+                        rows={1}
+                        value={deviceTopic}
+                        onChange={(e) => {
+                          setDeviceTopic(e.target.value);
+                          console.log(`The updated device topic is: ${e.target.value}`);
+                        }}
+                        variant="standard"
+                      />
+                    </div>
                   ) :   (
                     typeof value === 'boolean' ? value.toString() : value
                   )}

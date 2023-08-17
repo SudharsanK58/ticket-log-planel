@@ -18,6 +18,8 @@ import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 import { Alert, AlertTitle } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
+import TextField from '@mui/material/TextField';
+
 
 function App() {
   const [tickets, setTickets] = useState({});
@@ -25,6 +27,8 @@ function App() {
   const [error, setError] = useState(null);
   const [bleTxPowerValue, setBleTxPowerValue] = useState(null);
   const [ibeaconMajorValue, setIbeaconMajorValue] = useState('');
+  const [ibeaconMinorValue, setIbeaconMinorValue] = useState('');
+
 
   
 
@@ -46,6 +50,8 @@ function App() {
         } else {
           setTickets(response.data);
           setBleTxPowerValue(response.data.ble.bleTxPower);
+          setIbeaconMajorValue(response.data.ble.ibeaconMajor);
+          setIbeaconMinorValue(response.data.ble.ibeaconMinor);
           setLoading(false);
         }
       })
@@ -156,7 +162,39 @@ function App() {
                         </Select>
                       </FormControl>
                     </Box>
-                  ) : (
+                  ) : key === 'ibeaconMajor' ? (
+                    <Box sx={{ minWidth: 120 }}>
+                      <FormControl style={{width:"40%"}}>
+                        <InputLabel id="ibeaconMajor-label">Beacon Type</InputLabel>
+                        <Select
+                          labelId="ibeaconMajor-label"
+                          id="ibeaconMajor-select"
+                          value={ibeaconMajorValue}
+                          label="Beacon Type"
+                          onChange={(event) => {
+                            setIbeaconMajorValue(event.target.value);
+                            console.log(`The updated ibeaconMajor is ${event.target.value}`);
+                          }}
+                        >
+                          <MenuItem value={100}>Ticket beacon</MenuItem>
+                          <MenuItem value={102}>Beverage beacon</MenuItem>
+                          <MenuItem value={103}>Out data beacon</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  ) : key === 'ibeaconMinor' ? (
+                    <TextField style={{width:"40%"}}
+                      id="ibeaconMinor-textfield"
+                      label="iBeacon Minor"
+                      variant="outlined"
+                      type="number"
+                      value={ibeaconMinorValue}
+                      onChange={(event) => {
+                        setIbeaconMinorValue(event.target.value);
+                        console.log(`The updated ibeaconMinor is ${event.target.value}`);
+                      }}
+                    />
+                  ) :   (
                     typeof value === 'boolean' ? value.toString() : value
                   )}
         </TableCell>

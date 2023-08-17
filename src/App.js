@@ -81,10 +81,12 @@ function App() {
           <CircularProgress style={{ marginTop: '20px' }}/>
         </Stack>
       ) : error ? (  // 3. Conditional rendering based on error state
-      <Alert severity="info">
+      <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" marginTop="2%">
+      <Alert severity="info" style={{marginTop: '20px',width: '20%'}}>
         <AlertTitle>Info</AlertTitle>
         Invalid device or no data resisted for this device
       </Alert>
+      </Stack>
       ) :  (
       <TableContainer component={Paper} style={{ marginTop: '20px', overflow: "auto" }}>
         <Table>

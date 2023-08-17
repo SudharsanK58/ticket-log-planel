@@ -19,6 +19,8 @@ import Slider from '@mui/material/Slider';
 import { Alert, AlertTitle } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
 import TextField from '@mui/material/TextField';
+import { Radio, RadioGroup,FormControlLabel } from '@mui/material';
+
 
 
 function App() {
@@ -28,13 +30,16 @@ function App() {
   const [bleTxPowerValue, setBleTxPowerValue] = useState(null);
   const [ibeaconMajorValue, setIbeaconMajorValue] = useState('');
   const [ibeaconMinorValue, setIbeaconMinorValue] = useState('');
+  const [bleDfuModeValue, setBleDfuModeValue] = useState(false);
+
 
 
   
 
   const cards = [
-    { name: "Device 1", token: "04:e9:e5:14:90:26" },
-    { name: "Device 2", token: "1855e860-c57b-4c2f-9a04-9fc4ad9ba2d0" }
+    { name: "LED validator", token: "04:e9:e5:14:90:26" },
+    { name: "Display validator", token: "04:e9:e5:14:91:41" },
+    { name: "Device 2", token: "04:e9:e5:14:91:23" }
   ];
   const [selectedCardToken, setSelectedCardToken] = useState(cards[0].token); 
 
@@ -52,6 +57,7 @@ function App() {
           setBleTxPowerValue(response.data.ble.bleTxPower);
           setIbeaconMajorValue(response.data.ble.ibeaconMajor);
           setIbeaconMinorValue(response.data.ble.ibeaconMinor);
+          setBleDfuModeValue(response.data.ble.bleDfuMode);
           setLoading(false);
         }
       })
@@ -159,6 +165,7 @@ function App() {
                         >
                           <MenuItem value={-4}>Ticket validation</MenuItem>
                           <MenuItem value={4}>Long range validation</MenuItem>
+                          <MenuItem value={0}>Mid range validation</MenuItem>
                         </Select>
                       </FormControl>
                     </Box>
@@ -193,8 +200,27 @@ function App() {
                         setIbeaconMinorValue(event.target.value);
                         console.log(`The updated ibeaconMinor is ${event.target.value}`);
                       }}
+                      inputProps={{
+                        inputMode: 'numeric', // this ensures the mobile keyboard is numeric
+                        pattern: "[0-9]*"     // this ensures only numeric input is allowed
+                      }}
                     />
-                  ) :   (
+                  ) : key === 'bleDfuMode' ? (
+                    <FormControl>
+                      <RadioGroup
+                        row
+                        name="bleDfuMode-radio-group"
+                        value={bleDfuModeValue ? "enabled" : "disabled"}
+                        onChange={(event) => {
+                          setBleDfuModeValue(event.target.value === "enabled");
+                          console.log(`The updated bleDfuMode is ${event.target.value === "enabled"}`);
+                        }}
+                      >
+                        <FormControlLabel value="enabled" control={<Radio />} label="DFU enabled" />
+                        <FormControlLabel value="disabled" control={<Radio />} label="DFU disabled" />
+                      </RadioGroup>
+                    </FormControl>
+                  ) :    (
                     typeof value === 'boolean' ? value.toString() : value
                   )}
         </TableCell>

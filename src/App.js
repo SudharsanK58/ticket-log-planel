@@ -14,12 +14,15 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
+import Slider from '@mui/material/Slider';
 import { Alert, AlertTitle } from '@mui/material';
 
 function App() {
   const [tickets, setTickets] = useState({});
   const [loading, setLoading] = useState(true); 
   const [error, setError] = useState(null);
+  
 
   const cards = [
     { name: "Device 1", token: "04:e9:e5:14:90:26" },
@@ -84,30 +87,55 @@ function App() {
       <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" marginTop="2%">
       <Alert severity="info" style={{marginTop: '20px',width: '20%'}}>
         <AlertTitle>Info</AlertTitle>
-        Invalid device or no data resisted for this device
+        Invalid device or no data regsisted for this device
       </Alert>
       </Stack>
       ) :  (
-      <TableContainer component={Paper} style={{ marginTop: '20px', overflow: "auto" }}>
+      <TableContainer component={Paper} style={{ marginTop: '30px', overflow: "auto" }}>
         <Table>
-          <TableHead>
+          {/* <TableHead>
             <TableRow>
               <TableCell>Section</TableCell>
               <TableCell>Key</TableCell>
               <TableCell>Value</TableCell>
             </TableRow>
-          </TableHead>
+          </TableHead> */}
           <TableBody>
-            {Object.entries(tickets).map(([section, data]) => 
-              Object.entries(data).map(([key, value], idx) => (
+          {Object.entries(tickets).map(([section, data]) => {
+            let color, displaySectionName;
+            switch (section) {
+              case 'ble':
+                color = 'blue';
+                displaySectionName = 'Beacon Configuration';
+                break;
+              case 'mqtt':
+                color = 'green';
+                displaySectionName = 'MQTT Network Configuration';
+                break;
+              case 'validation':
+                color = 'red';
+                displaySectionName = 'Device Validation Configuration';
+                break;
+              default:
+                color = 'inherit';
+                displaySectionName = section;
+                break;
+            }
+
+              return Object.entries(data).map(([key, value], idx) => (
                 <TableRow key={key}>
-                  {idx === 0 && <TableCell rowSpan={Object.keys(data).length}>{section}</TableCell>}
-                  <TableCell>{key}</TableCell>
-                  <TableCell>{typeof value === 'boolean' ? value.toString() : value}</TableCell>
+                  {idx === 0 && (
+                    <TableCell rowSpan={Object.keys(data).length} style={{ fontWeight: 'bold', fontSize: '1.9em', color: color, textAlign: 'center' ,width: '450px'}}>
+                    {displaySectionName} {/* Display the renamed section name */}
+                  </TableCell>
+                  )}
+                  <TableCell style={{ color: color , fontSize: '1.1em'}}>{key}</TableCell>
+                  <TableCell style={{ color: color , fontSize: '1.0em',width: '550px'}}>{typeof value === 'boolean' ? value.toString() : value}</TableCell>
                 </TableRow>
-              ))
-            )}
+              ));
+            })}
           </TableBody>
+
         </Table>
       </TableContainer>
       )}

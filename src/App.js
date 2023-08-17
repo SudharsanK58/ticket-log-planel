@@ -23,6 +23,9 @@ function App() {
   const [tickets, setTickets] = useState({});
   const [loading, setLoading] = useState(true); 
   const [error, setError] = useState(null);
+  const [bleTxPowerValue, setBleTxPowerValue] = useState(null);
+  const [ibeaconMajorValue, setIbeaconMajorValue] = useState('');
+
   
 
   const cards = [
@@ -42,6 +45,7 @@ function App() {
           setLoading(false);
         } else {
           setTickets(response.data);
+          setBleTxPowerValue(response.data.ble.bleTxPower);
           setLoading(false);
         }
       })
@@ -140,16 +144,15 @@ function App() {
                         <Select
                           labelId="demo-simple-select-label"
                           id="demo-simple-select"
-                          value={value}
+                          value={bleTxPowerValue}
                           label="Validation Mode"
                           onChange={(event) => {
-                            // Handle the change of the select dropdown
-                            // For now, it's just logging, you might need more functionality
-                            console.log(event.target.value);
-                          }}
+                            setBleTxPowerValue(event.target.value);
+                            console.log(`The updated bleTxPower is ${event.target.value}`);
+                          }}                          
                         >
                           <MenuItem value={-4}>Ticket validation</MenuItem>
-                          <MenuItem value={0}>Long range validation</MenuItem>
+                          <MenuItem value={4}>Long range validation</MenuItem>
                         </Select>
                       </FormControl>
                     </Box>

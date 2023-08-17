@@ -31,6 +31,8 @@ function App() {
   const [ibeaconMajorValue, setIbeaconMajorValue] = useState('');
   const [ibeaconMinorValue, setIbeaconMinorValue] = useState('');
   const [bleDfuModeValue, setBleDfuModeValue] = useState(false);
+  const [bleIbeaconModeValue, setBleIbeaconModeValue] = useState(false);
+
 
 
 
@@ -58,6 +60,7 @@ function App() {
           setIbeaconMajorValue(response.data.ble.ibeaconMajor);
           setIbeaconMinorValue(response.data.ble.ibeaconMinor);
           setBleDfuModeValue(response.data.ble.bleDfuMode);
+          setBleIbeaconModeValue(response.data.ble.bleIbeaconMode);
           setLoading(false);
         }
       })
@@ -220,7 +223,22 @@ function App() {
                         <FormControlLabel value="disabled" control={<Radio />} label="DFU disabled" />
                       </RadioGroup>
                     </FormControl>
-                  ) :    (
+                  )  : key === 'bleIbeaconMode' ? (
+                    <FormControl>
+                      <RadioGroup
+                        row
+                        name="bleIbeaconMode-radio-group"
+                        value={bleIbeaconModeValue ? "Ibeacon" : "BIBO"}
+                        onChange={(event) => {
+                          setBleIbeaconModeValue(event.target.value === "Ibeacon");
+                          console.log(`The updated bleIbeaconMode is ${event.target.value === "Ibeacon"}`);
+                        }}
+                      >
+                        <FormControlLabel value="Ibeacon" control={<Radio />} label="Ibeacon mode" />
+                        <FormControlLabel value="BIBO" control={<Radio />} label="BIBO Mode" />
+                      </RadioGroup>
+                    </FormControl>
+                  ) : (
                     typeof value === 'boolean' ? value.toString() : value
                   )}
         </TableCell>

@@ -39,6 +39,10 @@ function App() {
   const [enableMultipleLightsValue, setEnableMultipleLightsValue] = useState(false);
   const [bleName, setBleName] = useState('');
   const [deviceTopic, setDeviceTopic] = useState('');
+  const [deviceReactTopic, setDeviceReactTopic] = useState('');
+  const [deviceLogTopic, setDeviceLogTopic] = useState('');
+
+  
 
 
 
@@ -52,6 +56,7 @@ function App() {
     { name: "Display validator", token: "04:e9:e5:14:91:41" },
     { name: "Device 2", token: "04:e9:e5:14:91:23" }
   ];
+  
   const [selectedCardToken, setSelectedCardToken] = useState(cards[0].token); 
 
   const fetchData = (token) => {
@@ -77,6 +82,10 @@ function App() {
           setEnableMultipleLightsValue(response.data.validation.enableMultipleLights);
           setBleName(response.data.ble.blename);
           setDeviceTopic(response.data.mqtt.deviceTopic);
+          setDeviceReactTopic(response.data.mqtt.deviceReactTopic);
+          setDeviceLogTopic(response.data.mqtt.deviceLogTopic);
+
+
 
 
           setLoading(false);
@@ -367,7 +376,38 @@ function App() {
                         variant="standard"
                       />
                     </div>
-                  ) :   (
+                  ) : key === 'deviceReactTopic' ? (
+                    <div>
+                      <TextField style={{width:"40%"}}
+                        id="device-react-topic-textfield"
+                        label="Device React Topic"
+                        multiline
+                        rows={1}
+                        value={deviceReactTopic}
+                        onChange={(e) => {
+                          setDeviceReactTopic(e.target.value);
+                          console.log(`The updated device react topic is: ${e.target.value}`);
+                        }}
+                        variant="standard"
+                      />
+                    </div>
+                  )
+                  : key === 'deviceLogTopic' ? (
+                    <div>
+                      <TextField style={{width:"40%"}}
+                        id="device-log-topic-textfield"
+                        label="Device Log Topic"
+                        multiline
+                        rows={1}
+                        value={deviceLogTopic}
+                        onChange={(e) => {
+                          setDeviceLogTopic(e.target.value);
+                          console.log(`The updated device log topic is: ${e.target.value}`);
+                        }}
+                        variant="standard"
+                      />
+                    </div>
+                  ) : (
                     typeof value === 'boolean' ? value.toString() : value
                   )}
         </TableCell>

@@ -113,6 +113,7 @@ function App() {
       // Check the response, maybe you want to do something upon success
       if (response.status === 200) {
         console.log('Data successfully sent to the API');
+        fetchData(selectedCardToken);
       }
     } catch (error) {
       console.error('Error sending data to the API:', error);

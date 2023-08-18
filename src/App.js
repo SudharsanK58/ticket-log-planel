@@ -41,10 +41,84 @@ function App() {
   const [deviceTopic, setDeviceTopic] = useState('');
   const [deviceReactTopic, setDeviceReactTopic] = useState('');
   const [deviceLogTopic, setDeviceLogTopic] = useState('');
+  const [mqttLogDelay, setMqttLogDelay] = useState('');
+  const [wifiLogPublishInterval, setWifiLogPublishInterval] = useState('');
+  const [gsmLogPublishInterval, setGsmLogPublishInterval] = useState('');
+  const [validTiceketDelay, setValidTiceketDelay] = useState('');
+  const [invalidTicketDelay, setInvalidTicketDelay] = useState('');
+  const [validSpecialTiceketDelay, setValidSpecialTiceketDelay] = useState('');
+  const [multipleTicketDelay, setMultipleTicketDelay] = useState('');
+  const [specialTicketType, setSpecialTicketType] = useState('');
+
 
   
 
+  const numberKeyMap = {
+  mqttLogDelay: [mqttLogDelay, setMqttLogDelay, "MQTT Log Delay"],
+  wifiLogPublishInterval: [wifiLogPublishInterval, setWifiLogPublishInterval, "WiFi Log Publish Interval"],
+  gsmLogPublishInterval: [gsmLogPublishInterval, setGsmLogPublishInterval, "GSM Log Publish Interval"],
+  validTiceketDelay: [validTiceketDelay, setValidTiceketDelay, "Valid Ticket Delay"],
+  invalidTicketDelay: [invalidTicketDelay, setInvalidTicketDelay, "Invalid Ticket Delay"],
+  validSpecialTiceketDelay: [validSpecialTiceketDelay, setValidSpecialTiceketDelay, "Valid Special Ticket Delay"],
+  multipleTicketDelay: [multipleTicketDelay, setMultipleTicketDelay, "Multiple Ticket Delay"],
+  specialTicketType: [specialTicketType, setSpecialTicketType, "Special Ticket Type"]
+  };
 
+  const handleUpdateDevice = async () => {
+    const reformattedData = {
+      ble: {
+        bleTxPower: bleTxPowerValue,
+        ibeaconMajor: ibeaconMajorValue,
+        ibeaconMinor: ibeaconMinorValue,
+        bleDfuMode: bleDfuModeValue,
+        bleIbeaconMode: bleIbeaconModeValue,
+        bleConnectMode: bleConnectModeValue,
+        blename: bleName
+      },
+      mqtt: {
+        mqttLogDelay: mqttLogDelay,
+        wifiLogPublishInterval: wifiLogPublishInterval,
+        gsmLogPublishInterval: gsmLogPublishInterval,
+        totalDeviceLog: totalDeviceLogValue,
+        sendOnlyGpsLog: sendOnlyGpsLogValue,
+        deviceTopic: deviceTopic,
+        deviceReactTopic: deviceReactTopic,
+        deviceLogTopic: deviceLogTopic
+      },
+      validation: {
+        validTiceketDelay: validTiceketDelay,
+        invalidTicketDelay: invalidTicketDelay,
+        validSpecialTiceketDelay: validSpecialTiceketDelay,
+        multipleTicketDelay: multipleTicketDelay,
+        specialTicketType: specialTicketType,
+        buzzerEnable: buzzerEnableValue,
+        enableMultipleLights: enableMultipleLightsValue
+      }
+    };
+  
+    // 4. Print the reformatted data to the console
+    console.log(reformattedData);
+    console.log(selectedCardToken);
+    try {
+      const response = await axios.post(
+        `http://mqtt.zusan.in:8081/postDeviceData/${selectedCardToken}`, 
+        reformattedData,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+  
+      // Check the response, maybe you want to do something upon success
+      if (response.status === 200) {
+        console.log('Data successfully sent to the API');
+      }
+    } catch (error) {
+      console.error('Error sending data to the API:', error);
+    }
+  }
+  
 
 
 
@@ -84,10 +158,14 @@ function App() {
           setDeviceTopic(response.data.mqtt.deviceTopic);
           setDeviceReactTopic(response.data.mqtt.deviceReactTopic);
           setDeviceLogTopic(response.data.mqtt.deviceLogTopic);
-
-
-
-
+          setMqttLogDelay(response.data.mqtt.mqttLogDelay);
+          setWifiLogPublishInterval(response.data.mqtt.wifiLogPublishInterval);
+          setGsmLogPublishInterval(response.data.mqtt.gsmLogPublishInterval);
+          setValidTiceketDelay(response.data.validation.validTiceketDelay);
+          setInvalidTicketDelay(response.data.validation.invalidTicketDelay);
+          setValidSpecialTiceketDelay(response.data.validation.validSpecialTiceketDelay);
+          setMultipleTicketDelay(response.data.validation.multipleTicketDelay);
+          setSpecialTicketType(response.data.validation.specialTicketType);
           setLoading(false);
         }
       })
@@ -122,7 +200,7 @@ function App() {
           </Select>
         </FormControl>
         <Button variant="contained" onClick={() => fetchData(selectedCardToken)}>Reload</Button>
-        <Button variant="contained">Update device</Button>
+        <Button variant="contained" onClick={handleUpdateDevice}>Update device</Button>
       </Stack>
 
       {/* Conditional Rendering */}
@@ -410,7 +488,7 @@ function App() {
                   ) : (
                     typeof value === 'boolean' ? value.toString() : value
                   )}
-        </TableCell>
+                  </TableCell>
                 </TableRow>
               ));
             })}

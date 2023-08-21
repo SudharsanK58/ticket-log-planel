@@ -10,12 +10,10 @@ import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
-import Slider from '@mui/material/Slider';
 import { Alert, AlertTitle } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
 import TextField from '@mui/material/TextField';
@@ -51,20 +49,6 @@ function App() {
   const [specialTicketType, setSpecialTicketType] = useState('');
   const [bleScanMode, setBleScanMode] = useState('');
   
-
-
-  
-
-  const numberKeyMap = {
-  mqttLogDelay: [mqttLogDelay, setMqttLogDelay, "MQTT Log Delay"],
-  wifiLogPublishInterval: [wifiLogPublishInterval, setWifiLogPublishInterval, "WiFi Log Publish Interval"],
-  gsmLogPublishInterval: [gsmLogPublishInterval, setGsmLogPublishInterval, "GSM Log Publish Interval"],
-  validTiceketDelay: [validTiceketDelay, setValidTiceketDelay, "Valid Ticket Delay"],
-  invalidTicketDelay: [invalidTicketDelay, setInvalidTicketDelay, "Invalid Ticket Delay"],
-  validSpecialTiceketDelay: [validSpecialTiceketDelay, setValidSpecialTiceketDelay, "Valid Special Ticket Delay"],
-  multipleTicketDelay: [multipleTicketDelay, setMultipleTicketDelay, "Multiple Ticket Delay"],
-  specialTicketType: [specialTicketType, setSpecialTicketType, "Special Ticket Type"]
-  };
 
   const handleUpdateDevice = async () => {
     const reformattedData = {
@@ -132,6 +116,8 @@ function App() {
   const cards = [
     { name: "LED validator", token: "04:e9:e5:14:90:26" },
     { name: "Display validator", token: "04:e9:e5:14:91:41" },
+    { name: "Cannada validator 1", token: "04:e9:e5:15:70:ac" },
+    { name: "Cannada validator 2", token: "04:e9:e5:15:70:8b" },
     { name: "Device 2", token: "04:e9:e5:14:91:23" }
   ];
   
@@ -502,7 +488,7 @@ function App() {
                           console.log(`The updated belScanMode mode is ${isScanMode}`);
                         }}
                       >
-                        <FormControlLabel value="Ibeacon scan mode" control={<Radio />} label="Ibeacon scan mode" />
+                        <FormControlLabel value="Ibeacon scan mode" control={<Radio /> } label="Ibeacon scan mode" />
                         <FormControlLabel value="No scan mode" control={<Radio />} label="No scan mode" />
                       </RadioGroup>
                     </FormControl>

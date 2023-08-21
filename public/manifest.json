@@ -1,6 +1,6 @@
 {
-  "short_name": "Device config panel",
-  "name": "Device config panel",
+  "short_name": "Ticket log panel",
+  "name": "Ticket log panel",
   "icons": [
     {
       "src": "favicon.ico",

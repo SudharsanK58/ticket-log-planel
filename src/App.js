@@ -49,6 +49,8 @@ function App() {
   const [validSpecialTiceketDelay, setValidSpecialTiceketDelay] = useState('');
   const [multipleTicketDelay, setMultipleTicketDelay] = useState('');
   const [specialTicketType, setSpecialTicketType] = useState('');
+  const [bleScanMode, setBleScanMode] = useState('');
+  
 
 
   
@@ -73,6 +75,7 @@ function App() {
         bleDfuMode: bleDfuModeValue,
         bleIbeaconMode: bleIbeaconModeValue,
         bleConnectMode: bleConnectModeValue,
+        bleScanMode: bleScanMode,
         blename: bleName
       },
       mqtt: {
@@ -167,6 +170,7 @@ function App() {
           setValidSpecialTiceketDelay(response.data.validation.validSpecialTiceketDelay);
           setMultipleTicketDelay(response.data.validation.multipleTicketDelay);
           setSpecialTicketType(response.data.validation.specialTicketType);
+          setBleScanMode(response.data.ble.bleScanMode);
           setLoading(false);
         }
       })
@@ -486,6 +490,22 @@ function App() {
                         variant="standard"
                       />
                     </div>
+                  ) : key === 'bleScanMode' ? (
+                    <FormControl>
+                      <RadioGroup
+                        row
+                        name="bleScanModeEnable-radio-group"
+                        value={bleScanMode ? "Ibeacon scan mode" : "No scan mode"}
+                        onChange={(event) => {
+                          const isScanMode = event.target.value === "Ibeacon scan mode";
+                          setBleScanMode(isScanMode);
+                          console.log(`The updated belScanMode mode is ${isScanMode}`);
+                        }}
+                      >
+                        <FormControlLabel value="Ibeacon scan mode" control={<Radio />} label="Ibeacon scan mode" />
+                        <FormControlLabel value="No scan mode" control={<Radio />} label="No scan mode" />
+                      </RadioGroup>
+                    </FormControl>
                   ) : (
                     typeof value === 'boolean' ? value.toString() : value
                   )}

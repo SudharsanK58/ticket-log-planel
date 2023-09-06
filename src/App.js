@@ -14,15 +14,23 @@ import TableRow from '@mui/material/TableRow';
 import axios from 'axios';
 import React, { useState, useEffect, useContext } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
+import ReplayIcon from '@mui/icons-material/Replay';
 import { Alert, AlertTitle } from '@mui/material';
 
 
 function App() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);   
+  const redBackgroundRowStyle = {
+    backgroundColor: 'lightcoral',
+  };
+  
   const cards = [
     { name: "35-device", token: "98:CD:AC:51:4A:E8" },
-    { name: "37-device", token: "98:CD:AC:51:4A:BC" }
+    { name: "37-device", token: "98:CD:AC:51:4A:BC" },
+    { name: "20-device", token: "DC:4F:22:5F:04:6C" },
+    { name: "70-device", token: "04:E9:E5:15:70:AC" },
+    { name: "75-device", token: "04:E9:E5:15:70:8B" }
   ];
   const [selectedCardToken, setSelectedCardToken] = useState(cards[0].token); 
 
@@ -64,7 +72,9 @@ function App() {
             ))}
           </Select>
         </FormControl>
-        <Button variant="contained" onClick={() => fetchData(selectedCardToken)}>Reload</Button>
+        <Button variant="contained" onClick={() => fetchData(selectedCardToken)}>
+          <ReplayIcon />
+        </Button>
         {/* <Button variant="contained">Buy Tickets</Button> */}
       </Stack>
       {/* Table Component */}
@@ -79,28 +89,31 @@ function App() {
             No tickets ticket is validated on this device.
           </Alert>
         ) :(
-      <TableContainer style={{ marginTop: '20px', overflow:"auto",justifyContent: 'center', alignItems: 'center'}}>
-        <Table>
-          <TableHead>
-            <TableRow>
-                <TableCell style={{ fontWeight: 'bold',fontSize: '1.5em',width: '550px', textAlign: 'center'}}>User Name</TableCell>
-                <TableCell style={{ fontWeight: 'bold',fontSize: '1.5em',width: '550px', textAlign: 'center'}}>Ticket ID</TableCell>
-                <TableCell style={{ fontWeight: 'bold',fontSize: '1.5em',width: '550px', textAlign: 'center'}}>Count</TableCell>
-                <TableCell style={{ fontWeight: 'bold',fontSize: '1.5em',width: '550px', textAlign: 'center'}}>Validated time</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-                {tickets.map(ticket => (
-                  <TableRow key={ticket.ticket_id}>
-                    <TableCell style={{fontSize: '1.0em',textAlign: 'center'}}>{ticket.username}</TableCell>
-                    <TableCell style={{fontSize: '1.0em',textAlign: 'center'}}>{ticket.ticket_type}</TableCell>
-                    <TableCell style={{fontSize: '1.0em',textAlign: 'center'}}>{ticket.ticket_id}</TableCell>
-                    <TableCell style={{fontSize: '1.0em',textAlign: 'center'}}>{ticket.now_time}</TableCell>
+          <TableContainer style={{ marginTop: '20px', overflow: "auto", justifyContent: 'center', alignItems: 'center' }}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '550px', textAlign: 'center' }}>User Name</TableCell>
+                  <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '550px', textAlign: 'center' }}>Ticket ID</TableCell>
+                  <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '550px', textAlign: 'center' }}>Count</TableCell>
+                  <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '550px', textAlign: 'center' }}>Validated time</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {tickets.map((ticket, index) => (
+                  <TableRow
+                    key={ticket.ticket_id}
+                    style={index > 0 && ticket.ticket_id === tickets[index - 1].ticket_id ? redBackgroundRowStyle : {}}
+                  >
+                    <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{ticket.username}</TableCell>
+                    <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{ticket.ticket_id}</TableCell>
+                    <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{ticket.count}</TableCell>
+                    <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{ticket.now_time}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
-        </Table>
-      </TableContainer>
+            </Table>
+          </TableContainer>
       )}
       </div>
     </div>

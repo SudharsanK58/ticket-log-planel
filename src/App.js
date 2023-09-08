@@ -29,6 +29,9 @@ function App() {
   const [selectedButton, setSelectedButton] = useState('Ticket List'); // Initialize with the default selected button
   const [scratchTicketLoading, setScratchTicketLoading] = useState(false);
   const [noDataFound, setNoDataFound] = useState(false);
+  const [androidOrIOS, setAndroidOrIOS] = useState('Android'); // State for Android or iOS select
+  const [validator, setValidator] = useState('Ecolane'); // State for the Validator select
+  const [apiResponse, setApiResponse] = useState('');
   const redBackgroundRowStyle = {
     backgroundColor: 'lightcoral',
   };
@@ -96,6 +99,33 @@ function App() {
   useEffect(() => {
     fetchData(selectedCardToken);
   }, []);
+  const handleGetDetailsClick = () => {
+    let apiUrl = '';
+    setLoading(true); // Set loading state
+    if (androidOrIOS === 'Android' && validator === 'Ecolane') {
+      apiUrl = 'https://zig-app.com/ConfigAPIV2/Getclientconfig?Pin=ZIG19';
+    } else if (androidOrIOS === 'IOS' && validator === 'Ecolane') {
+      apiUrl = 'https://zig-app.com/ConfigAPIV2IOS/Getclientconfig?Pin=ZIG19';
+    } else if (androidOrIOS === 'Android' && validator === 'MODOT') {
+      apiUrl = 'https://zig-trip.com/ConfigAPIV2/Getclientconfig?Pin=ZIG19';
+    } else if (androidOrIOS === 'IOS' && validator === 'MODOT') {
+      apiUrl = 'https://zig-trip.com/ConfigAPIV2IOS/Getclientconfig?Pin=ZIG19';
+    }
+
+    if (apiUrl) {
+      axios.get(apiUrl)
+        .then(response => {
+          console.log("API Response:", response.data);
+          setApiResponse(response.data);
+          setLoading(false);
+        })
+        .catch(error => {
+          console.error("There was an error fetching the data:", error);
+          setApiResponse('');
+          setLoading(false);
+        });
+    }
+  };
   useEffect(() => {
     if (selectedButton === 'Ticket List') {
       // When switching back to "Ticket List" button, load data
@@ -254,6 +284,52 @@ function App() {
           </Table>
         </TableContainer>
       )}
+  {selectedButton === 'Validator Registered' && (
+          <>
+            <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" marginTop="2%">
+              <FormControl variant="outlined" size="small" style={{ marginRight: '10px' }}>
+                <Select
+                  value={androidOrIOS}
+                  onChange={(e) => setAndroidOrIOS(e.target.value)}
+                  style={{ width: '150px' }}
+                >
+                  <MenuItem value="Android">Android</MenuItem>
+                  <MenuItem value="IOS">IOS</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl variant="outlined" size="small" style={{ marginRight: '10px' }}>
+                <Select
+                  value={validator}
+                  onChange={(e) => setValidator(e.target.value)}
+                  style={{ width: '150px' }}
+                >
+                  <MenuItem value="Ecolane">Ecolane</MenuItem>
+                  <MenuItem value="MODOT">MODOT</MenuItem>
+                </Select>
+              </FormControl>
+              <Button variant="contained" onClick={handleGetDetailsClick}>
+                Get Details
+              </Button>
+            </Stack>
+
+            {loading && (
+              <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                <CircularProgress style={{ marginTop: '20px' }} />
+              </div>
+            )}
+
+            {!loading && apiResponse && (
+              <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                {apiResponse.map(item => (
+               <div key={item.id}>
+                 {item.Id && <p>ID: {item.Id}</p>}
+                {item.Clientname && <p>Client Name: {item.Clientname}</p>}  
+             </div>
+              ))}
+              </div>
+            )}
+          </>
+        )}
   </div>
   );
 }

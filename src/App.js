@@ -45,6 +45,9 @@ function App() {
         // Clear the Search Ticket table when the button is selected
         setTickets([]);
       }
+      if (buttonText === 'Validator Registered'){
+        handleGetDetailsClick()
+      }
       
     }
   };
@@ -318,16 +321,57 @@ function App() {
               </div>
             )}
 
-            {!loading && apiResponse && (
-              <div style={{ marginTop: '20px', textAlign: 'center' }}>
-                {apiResponse.map(item => (
-               <div key={item.id}>
-                 {item.Id && <p>ID: {item.Id}</p>}
-                {item.Clientname && <p>Client Name: {item.Clientname}</p>}  
-             </div>
-              ))}
-              </div>
-            )}
+{!loading && apiResponse && (
+  <div style={{ marginTop: '20px', textAlign: 'center' }}>
+<TableContainer style={{ marginTop: '20px', overflow: "auto", justifyContent: 'center', alignItems: 'center' }}>
+  <Table>
+    <TableHead>
+      <TableRow>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '200px', textAlign: 'center' }}>Macaddress</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '200px', textAlign: 'center' }}>Major</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '200px', textAlign: 'center' }}>Minor</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '700px', textAlign: 'center' }}>Client Names</TableCell>
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      {!loading && apiResponse && (
+        apiResponse.reduce((uniqueDevices, client) => {
+          client.Macaddresslist.forEach(macAddressItem => {
+            const existingDevice = uniqueDevices.find(
+              device => device.Macaddress === macAddressItem.Macaddress
+            );
+            if (existingDevice) {
+              if (!existingDevice.ClientNames.includes(client.Clientname)) {
+                existingDevice.ClientNames.push(client.Clientname);
+              }
+            } else {
+              uniqueDevices.push({
+                Macaddress: macAddressItem.Macaddress,
+                Major: macAddressItem.Major,
+                Minor: macAddressItem.Minor,
+                ClientNames: [client.Clientname],
+              });
+            }
+          });
+          return uniqueDevices;
+        }, []).map(device => (
+          <TableRow key={device.Macaddress}>
+            <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{device.Macaddress}</TableCell>
+            <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{device.Major}</TableCell>
+            <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{device.Minor}</TableCell>
+            <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{device.ClientNames.join(', ')}</TableCell>
+          </TableRow>
+        ))
+      )}
+    </TableBody>
+  </Table>
+</TableContainer>
+  </div>
+)}
+
+
+
+
           </>
         )}
   </div>

@@ -53,7 +53,7 @@ function App() {
   };
   const cards = [
     { name: "35-device", token: "98:CD:AC:51:4A:E8" },
-    { name: "37-device", token: "98:CD:AC:51:4A:BC" },
+    { name: "24-device", token: "98:CD:AC:51:4A:BC" },
     { name: "20-device", token: "DC:4F:22:5F:04:6C" },
     { name: "70-device", token: "04:E9:E5:15:70:AC" },
     { name: "75-device", token: "04:E9:E5:15:70:8B" }
@@ -141,7 +141,7 @@ function App() {
   return (
     <div className="App">
     <Typography variant="h4" gutterBottom align="center" marginTop="2%">
-      Ticket log panel
+      Device log panel
     </Typography>
 
     {/* Center-align the ButtonGroup */}

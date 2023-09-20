@@ -79,6 +79,7 @@ function App() {
       return;
     }
     setScratchTicketLoading(true);
+    setTickets([]);
 
     axios.get(`http://mqtt.zusan.in:8080/today_data_ticket_id/${ticketId}`)
       .then(response => {
@@ -327,9 +328,9 @@ function App() {
   <Table>
     <TableHead>
       <TableRow>
-        <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '200px', textAlign: 'center' }}>Macaddress</TableCell>
-        <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '200px', textAlign: 'center' }}>Major</TableCell>
-        <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '200px', textAlign: 'center' }}>Minor</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '300px', textAlign: 'center' }}>Macaddress</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '300px', textAlign: 'center' }}>Major</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '300px', textAlign: 'center' }}>Minor</TableCell>
         <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '700px', textAlign: 'center' }}>Client Names</TableCell>
       </TableRow>
     </TableHead>

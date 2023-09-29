@@ -32,12 +32,42 @@ function App() {
   const [androidOrIOS, setAndroidOrIOS] = useState('Android'); // State for Android or iOS select
   const [validator, setValidator] = useState('Ecolane'); // State for the Validator select
   const [apiResponse, setApiResponse] = useState('');
+  const [selectedTimezone, setSelectedTimezone] = useState('IST'); // Initialize with a default value if needed
+  const [deviceStatusLoading, setDeviceStatusLoading] = useState(false);
+  const [deviceStatusData, setDeviceStatusData] = useState(null);
+  const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const redBackgroundRowStyle = {
     backgroundColor: 'lightcoral',
   };
   const transitionStyle = {
     transition: 'opacity 0.5s ease-in-out',
   };
+  function isLastSeenBelow5Minutes(inTime) {
+    const currentTime = new Date();
+    const inTimeUTC = new Date(new Date(inTime).getTime() + (5 * 60 + 30) * 60 * 1000);
+  
+    const timeDifferenceInSeconds = Math.floor((currentTime - inTimeUTC) / 1000);
+  
+    return timeDifferenceInSeconds < 300; // 300 seconds = 5 minutes
+  }
+  
+  function calculateTimeDifference(inTime) {
+    const currentTime = new Date();
+    const inTimeUTC = new Date(new Date(inTime).getTime() + (5 * 60 + 30) * 60 * 1000);
+  
+    const timeDifferenceInSeconds = Math.floor((currentTime - inTimeUTC) / 1000);
+  
+    if (timeDifferenceInSeconds < 60) {
+      return `${timeDifferenceInSeconds} secs`;
+    } else if (timeDifferenceInSeconds < 3600) {
+      const minutes = Math.floor(timeDifferenceInSeconds / 60);
+      return `${minutes} mins`;
+    } else {
+      const hours = Math.floor(timeDifferenceInSeconds / 3600);
+      return `${hours} hrs`;
+    }
+  }
+  
   const handleButtonClick = (buttonText) => {
     if (selectedButton !== buttonText) {
       setSelectedButton(buttonText);
@@ -60,6 +90,32 @@ function App() {
   ];
   const [selectedCardToken, setSelectedCardToken] = useState(cards[0].token); 
 
+    // Function to make the API call for device status
+    const fetchDeviceStatusData = () => {
+      // Check if the "Validator Status" button is selected
+      if (selectedButton === 'Validator Status') {
+        setDeviceStatusLoading(true);
+  
+        // Construct the API URL based on the selected timezone
+        const apiUrl = `http://mqtt.zusan.in:8080/device_log_data`;
+  
+        // Make the API request
+        fetch(apiUrl)
+          .then((response) => response.json())
+          .then((data) => {
+            setDeviceStatusData(data);
+            setDeviceStatusLoading(false);
+            // Log the apiResponse and loading status
+            console.log('API Response:', data);
+            console.log('Loading Status:', deviceStatusLoading);
+            console.log(`User's time zone: ${userTimeZone}`);
+          })
+          .catch((error) => {
+            console.error('Error fetching device status data:', error);
+            setDeviceStatusLoading(false);
+          });
+      }
+    };
   const fetchData = (token) => {
     setLoading(true);
   
@@ -135,6 +191,10 @@ function App() {
       // When switching back to "Ticket List" button, load data
       fetchData(selectedCardToken);
     }
+    if (selectedButton === 'Validator Status') {
+      // When switching back to "Ticket List" button, load data
+      fetchDeviceStatusData()
+    }
   }, [selectedButton, selectedCardToken]);
   
 
@@ -167,6 +227,13 @@ function App() {
           style={{ fontWeight: selectedButton === 'Validator Registered' ? 'bold' : 'normal' }}
         >
           Validator Registered
+        </Button>
+        <Button
+          onClick={() => handleButtonClick('Validator Status')}
+          variant={selectedButton === 'Validator Status' ? 'contained' : 'outlined'}
+          style={{ fontWeight: selectedButton === 'Validator Status' ? 'bold' : 'normal' }}
+        >
+          Validator Status
         </Button>
       </ButtonGroup>
     </div>
@@ -369,12 +436,88 @@ function App() {
 </TableContainer>
   </div>
 )}
-
-
-
-
           </>
         )}
+  {selectedButton === 'Validator Status' && (
+  <>
+    {/* Dropdown for Timezone selection */}
+    <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" marginTop="2%">
+    <FormControl variant="outlined" size="small" style={{ marginRight: '10px' }}>
+      {/* <Select
+        value={selectedTimezone}
+        onChange={(e) => setSelectedTimezone(e.target.value)}
+        style={{ width: '250px' }}
+      >
+        <MenuItem value="IST">Indian Standard Time</MenuItem>
+        <MenuItem value="EST">Eastern Standard Time</MenuItem>
+      </Select> */}
+    </FormControl>
+    {/* Reload button */}
+    <Button variant="contained" onClick = {fetchDeviceStatusData}>
+      Reload
+    </Button>
+    </Stack>
+    
+    {/* Rest of the code related to loading and displaying data */}
+      {deviceStatusLoading && (
+    <div style={{ marginTop: '20px', textAlign: 'center' }}>
+      <CircularProgress style={{ marginTop: '20px' }} />
+    </div>
+  )}
+
+  {!deviceStatusLoading && deviceStatusData && (
+    <div style={{ marginTop: '20px', textAlign: 'center' }}>
+      <TableContainer style={{ marginTop: '20px', overflow: 'auto', justifyContent: 'center', alignItems: 'center' }}>
+  <Table>
+    <TableHead>
+      <TableRow>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center' }}>Device ID</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center' }}>Greenwich time</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center' }}>Indian time</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center' }}>Last seen(Indian time)</TableCell>
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      {!deviceStatusLoading &&
+        deviceStatusData &&
+        deviceStatusData.map((item, index) => (
+          <TableRow key={index}>
+            <TableCell style={{ fontSize: '1.2em', textAlign: 'center' }}>{item.deviceId}</TableCell>
+            <TableCell style={{ fontSize: '1.2em', textAlign: 'center' }}>
+            {new Date(new Date(item.timestamp).getTime()).toLocaleString('en-US', {
+              year: 'numeric',
+              month: 'numeric',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: 'numeric',
+              second: 'numeric',
+              hour12: true,
+            }) + ' GST'}
+          </TableCell>
+            <TableCell style={{ fontSize: '1.2em', textAlign: 'center' }}>
+            {new Date(new Date(item.timestamp).getTime() + (5 * 60 + 30) * 60 * 1000).toLocaleString('en-US', {
+              year: 'numeric',
+              month: 'numeric',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: 'numeric',
+              second: 'numeric',
+              hour12: true,
+            }) + ' IST'}
+          </TableCell>
+          <TableCell style={{ fontSize: '1.2em', textAlign: 'center', color: isLastSeenBelow5Minutes(item.timestamp) ? 'green' : 'inherit', fontWeight: isLastSeenBelow5Minutes(item.timestamp) ? 'bold' : 'normal' }}>
+            {calculateTimeDifference(item.timestamp)} ago
+          </TableCell>
+          </TableRow>
+        ))}
+    </TableBody>
+  </Table>
+</TableContainer>
+    </div>
+  )}
+  </>
+)}
+        
   </div>
   );
 }

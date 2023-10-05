@@ -478,46 +478,62 @@ function App() {
         <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Validation id</TableCell>
         <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Start time</TableCell>
         <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Last in time</TableCell>
-        <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Last seen</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Running status</TableCell>
       </TableRow>
     </TableHead>
     <TableBody>
       {!deviceStatusLoading &&
         deviceStatusData &&
-        deviceStatusData.map((item, index) => (
-          <TableRow key={index}>
-            <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.deviceId}</TableCell>
-            <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.firmwareVersion}</TableCell>
-            <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.bleTxpower}</TableCell>
-            <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.bleMinor}</TableCell>
-            <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.validationTopic}</TableCell>
-            <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>
-            {new Date(new Date(item.StartingTime).getTime() + (5 * 60 + 30) * 60 * 1000).toLocaleString('en-US', {
-              year: 'numeric',
-              month: 'numeric',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: 'numeric',
-              second: 'numeric',
-              hour12: true,
-            })}
-          </TableCell>
-          <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>
-            {new Date(new Date(item.timestamp).getTime() + (5 * 60 + 30) * 60 * 1000).toLocaleString('en-US', {
-              year: 'numeric',
-              month: 'numeric',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: 'numeric',
-              second: 'numeric',
-              hour12: true,
-            })}
-          </TableCell>
-          <TableCell style={{ fontSize: '1.0em', textAlign: 'center', color: isLastSeenBelow5Minutes(item.timestamp) ? 'green' : 'inherit', fontWeight: isLastSeenBelow5Minutes(item.timestamp) ? 'bold' : 'normal' }}>
-            {calculateTimeDifference(item.timestamp)} ago
-          </TableCell>
-          </TableRow>
-        ))}
+        deviceStatusData.map((item, index) => {
+          // Parse the "Starting Time" and "Last In Time" as Date objects
+          const startingTime = new Date(item.StartingTime);
+          const lastInTime = new Date(item.timestamp);
+
+          // Calculate the time difference in milliseconds
+          const timeDifference = lastInTime - startingTime;
+
+          // Convert milliseconds to hours, minutes, and seconds
+          const hours = Math.floor(timeDifference / (60 * 60 * 1000));
+          const minutes = Math.floor((timeDifference % (60 * 60 * 1000)) / (60 * 1000));
+          const seconds = Math.floor((timeDifference % (60 * 1000)) / 1000);
+
+          return (
+            <TableRow key={index}>
+              <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.deviceId}</TableCell>
+              <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.firmwareVersion}</TableCell>
+              <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.bleTxpower}</TableCell>
+              <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.bleMinor}</TableCell>
+              <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.validationTopic}</TableCell>
+              <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>
+                {new Date(startingTime.getTime() + (5 * 60 + 30) * 60 * 1000).toLocaleString('en-US', {
+                  year: 'numeric',
+                  month: 'numeric',
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: 'numeric',
+                  second: 'numeric',
+                  hour12: true,
+                })}
+              </TableCell>
+              <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>
+                {new Date(lastInTime.getTime() + (5 * 60 + 30) * 60 * 1000).toLocaleString('en-US', {
+                  year: 'numeric',
+                  month: 'numeric',
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: 'numeric',
+                  second: 'numeric',
+                  hour12: true,
+                })}
+              </TableCell>
+              <TableCell style={{ fontSize: '1.0em', textAlign: 'center', color: 'inherit', fontWeight: 'normal' }}>
+              {isNaN(hours) || isNaN(minutes) || isNaN(seconds)
+                ? 'N/A'
+                : `${hours}h ${minutes}m ${seconds}s`}
+              </TableCell>
+            </TableRow>
+          );
+        })}
     </TableBody>
   </Table>
 </TableContainer>

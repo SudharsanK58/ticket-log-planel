@@ -471,10 +471,14 @@ function App() {
   <Table>
     <TableHead>
       <TableRow>
-        <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center' }}>Device ID</TableCell>
-        <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center' }}>Greenwich time</TableCell>
-        <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center' }}>Indian time</TableCell>
-        <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center' }}>Last seen(Indian time)</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Device ID</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Device version</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Ble power</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Ble minor</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Validation id</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Start time</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Last in time</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Last seen</TableCell>
       </TableRow>
     </TableHead>
     <TableBody>
@@ -482,9 +486,13 @@ function App() {
         deviceStatusData &&
         deviceStatusData.map((item, index) => (
           <TableRow key={index}>
-            <TableCell style={{ fontSize: '1.2em', textAlign: 'center' }}>{item.deviceId}</TableCell>
-            <TableCell style={{ fontSize: '1.2em', textAlign: 'center' }}>
-            {new Date(new Date(item.timestamp).getTime()).toLocaleString('en-US', {
+            <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.deviceId}</TableCell>
+            <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.firmwareVersion}</TableCell>
+            <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.bleTxpower}</TableCell>
+            <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.bleMinor}</TableCell>
+            <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.validationTopic}</TableCell>
+            <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>
+            {new Date(new Date(item.StartingTime).getTime() + (5 * 60 + 30) * 60 * 1000).toLocaleString('en-US', {
               year: 'numeric',
               month: 'numeric',
               day: 'numeric',
@@ -492,9 +500,9 @@ function App() {
               minute: 'numeric',
               second: 'numeric',
               hour12: true,
-            }) + ' GST'}
+            })}
           </TableCell>
-            <TableCell style={{ fontSize: '1.2em', textAlign: 'center' }}>
+          <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>
             {new Date(new Date(item.timestamp).getTime() + (5 * 60 + 30) * 60 * 1000).toLocaleString('en-US', {
               year: 'numeric',
               month: 'numeric',
@@ -503,9 +511,9 @@ function App() {
               minute: 'numeric',
               second: 'numeric',
               hour12: true,
-            }) + ' IST'}
+            })}
           </TableCell>
-          <TableCell style={{ fontSize: '1.2em', textAlign: 'center', color: isLastSeenBelow5Minutes(item.timestamp) ? 'green' : 'inherit', fontWeight: isLastSeenBelow5Minutes(item.timestamp) ? 'bold' : 'normal' }}>
+          <TableCell style={{ fontSize: '1.0em', textAlign: 'center', color: isLastSeenBelow5Minutes(item.timestamp) ? 'green' : 'inherit', fontWeight: isLastSeenBelow5Minutes(item.timestamp) ? 'bold' : 'normal' }}>
             {calculateTimeDifference(item.timestamp)} ago
           </TableCell>
           </TableRow>

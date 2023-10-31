@@ -19,6 +19,10 @@ import { Alert, AlertTitle } from '@mui/material';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import TextField from '@mui/material/TextField';
 import SearchIcon from '@mui/icons-material/Search';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Paper from '@mui/material/Paper';
 
 
 function App() {
@@ -35,7 +39,15 @@ function App() {
   const [selectedTimezone, setSelectedTimezone] = useState('IST'); // Initialize with a default value if needed
   const [deviceStatusLoading, setDeviceStatusLoading] = useState(false);
   const [deviceStatusData, setDeviceStatusData] = useState(null);
+  const [searchDeviceIdMode, setSearchDeviceIdMode] = useState('');
+  const [searchedDeviceId, setSearchedDeviceId] = useState('');
+  const [isSearchingDeviceId, setIsSearchingDeviceId] = useState(false);
+  const [searchDeviceIdResponse, setSearchDeviceIdResponse] = useState(null);
   const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const [ticketlistSelectedTimeZone, ticketlistsetSelectedTimeZone] = useState('IST'); // Define ticketlistSelectedTimeZone and ticketlistsetSelectedTimeZone
+  const [ticketlistSelectedTimeFormat, ticketlistsetSelectedTimeFormat] = useState('12hr'); // Updated state variable
+
+  
   const redBackgroundRowStyle = {
     backgroundColor: 'lightcoral',
   };
@@ -82,11 +94,11 @@ function App() {
     }
   };
   const cards = [
-    { name: "35-device", token: "98:CD:AC:51:4A:E8" },
     { name: "24-device", token: "98:CD:AC:51:4A:BC" },
-    { name: "20-device", token: "DC:4F:22:5F:04:6C" },
-    { name: "70-device", token: "04:E9:E5:15:70:AC" },
-    { name: "75-device", token: "04:E9:E5:15:70:8B" }
+    { name: "35-device", token: "98:CD:AC:51:4A:E8" },
+    { name: "48-device", token: "98:CD:AC:A0:01:48" },
+    { name: "49-device", token: "98:CD:AC:A0:01:49" },
+    { name: "201-device", token: "04:e9:e5:15:70:91" }
   ];
   const [selectedCardToken, setSelectedCardToken] = useState(cards[0].token); 
 
@@ -113,6 +125,24 @@ function App() {
           .catch((error) => {
             console.error('Error fetching device status data:', error);
             setDeviceStatusLoading(false);
+          });
+      }
+    };
+    const searchDeviceId = () => {
+      if (searchedDeviceId) {
+        // Make the API request using the entered device ID
+        setIsSearchingDeviceId(true);
+        fetch(`https://mdot.zed-admin.com/api/GetDeviceConfig/${searchedDeviceId}`)
+          .then((response) => response.json())
+          .then((data) => {
+            setIsSearchingDeviceId(false);
+            // Handle the API response, e.g., print it to the console
+            console.log(data);
+            setSearchDeviceIdResponse(data);
+          })
+          .catch((error) => {
+            console.error('API request error:', error);
+            setIsSearchingDeviceId(false);
           });
       }
     };
@@ -159,6 +189,71 @@ function App() {
   useEffect(() => {
     fetchData(selectedCardToken);
   }, []);
+    
+
+  const ticketlistFormatTime = (timeString) => {
+    // Split the date and time parts
+    const [datePart, timePart, timeZone] = timeString.split(' ');
+  
+    // Parse the date and time parts
+    const [year, month, day] = datePart.split('-');
+    const [hour, minute, second] = timePart.split(':');
+  
+    // Create a new Date object with the parsed values
+    const date = new Date(year, month - 1, day, hour, minute, second);
+  
+    // Handle timezone differences
+  if (ticketlistSelectedTimeZone === 'EST') {
+    // IST is 9 hours and 30 minutes ahead of EST
+    date.setHours(date.getHours() - 9);
+    date.setMinutes(date.getMinutes() - 30);
+  } else if (ticketlistSelectedTimeZone === 'PST') {
+    // IST is 12 hours and 30 minutes ahead of PST
+    date.setHours(date.getHours() - 12);
+    date.setMinutes(date.getMinutes() - 30);
+  } else if (ticketlistSelectedTimeZone === 'CST') {
+    // IST is 10 hours and 30 minutes ahead of CST
+    date.setHours(date.getHours() - 10);
+    date.setMinutes(date.getMinutes() - 30);
+  } else if (ticketlistSelectedTimeZone === 'MST') {
+    // IST is 11 hours and 30 minutes ahead of MST
+    date.setHours(date.getHours() - 11);
+    date.setMinutes(date.getMinutes() - 30);
+  }
+  
+    // Check if the date has gone to the previous day
+    if (date.getDate() !== parseInt(day, 10)) {
+      date.setDate(date.getDate() - 1); // Increment the date by one day
+    }
+  
+    // Format the date and time based on the selected time format
+    const options = {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour12: ticketlistSelectedTimeFormat === '12hr',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    };
+  
+    const formattedTime = date.toLocaleString('en-US', options);
+
+  if (ticketlistSelectedTimeFormat === '24hr') {
+    return formattedTime + ' hrs';
+  }
+
+  return formattedTime;
+  };
+  
+  
+  
+  
+
+  
+  
+  
+
   const handleGetDetailsClick = () => {
     let apiUrl = '';
     setLoading(true); // Set loading state
@@ -235,6 +330,13 @@ function App() {
         >
           Validator Status
         </Button>
+        <Button
+          onClick={() => handleButtonClick('Validator Settings')}
+          variant={selectedButton === 'Validator Settings' ? 'contained' : 'outlined'}
+          style={{ fontWeight: selectedButton === 'Validator Settings' ? 'bold' : 'normal' }}
+        >
+          Validator Settings
+        </Button>
       </ButtonGroup>
     </div>
 
@@ -259,6 +361,37 @@ function App() {
           <Button variant="contained" onClick={() => fetchData(selectedCardToken)}>
             <ReplayIcon />
           </Button>
+          <FormControl variant="outlined" size="small">
+          <Select
+            labelId="timezone-label"
+            value={ticketlistSelectedTimeZone}
+            onChange={(e) => {
+              ticketlistsetSelectedTimeZone(e.target.value);
+              // Handle timezone change here
+            }}
+            style={{ marginLeft: '10px', width: '100px' }}
+          >
+            <MenuItem value="IST">IST</MenuItem>
+            <MenuItem value="EST">EST</MenuItem>
+            <MenuItem value="PST">PST</MenuItem>
+            <MenuItem value="CST">CST</MenuItem>
+            <MenuItem value="MST">MST</MenuItem>
+          </Select>
+
+        </FormControl>
+        <RadioGroup
+          row
+          aria-labelledby="demo-row-radio-buttons-group-label"
+          name="row-radio-buttons-group"
+          style={{ marginLeft: '30px', width: '190px' }}
+          value={ticketlistSelectedTimeFormat}
+          onChange={(e) => {
+            ticketlistsetSelectedTimeFormat(e.target.value);
+          }}
+        >
+          <FormControlLabel value="12hr" control={<Radio />} label="12 hrs" />
+          <FormControlLabel value="24hr" control={<Radio />} label="24 hrs" />
+        </RadioGroup>
         </Stack>
         {/* Table Component */}
         <div style={{ marginTop: '20px' }}>
@@ -291,7 +424,9 @@ function App() {
                       <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{ticket.username}</TableCell>
                       <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{ticket.ticket_id}</TableCell>
                       <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{ticket.count}</TableCell>
-                      <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{ticket.now_time}</TableCell>
+                      <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>
+                        {ticketlistFormatTime(ticket.now_time)}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -315,6 +450,37 @@ function App() {
             <Button variant="contained" onClick={fetchTicketData}>
               <SearchIcon />
             </Button>
+            <FormControl variant="outlined" size="small">
+          <Select
+            labelId="timezone-label"
+            value={ticketlistSelectedTimeZone}
+            onChange={(e) => {
+              ticketlistsetSelectedTimeZone(e.target.value);
+              // Handle timezone change here
+            }}
+            style={{ marginLeft: '10px', width: '100px' }}
+          >
+            <MenuItem value="IST">IST</MenuItem>
+            <MenuItem value="EST">EST</MenuItem>
+            <MenuItem value="PST">PST</MenuItem>
+            <MenuItem value="CST">CST</MenuItem>
+            <MenuItem value="MST">MST</MenuItem>
+          </Select>
+
+        </FormControl>
+        <RadioGroup
+          row
+          aria-labelledby="demo-row-radio-buttons-group-label"
+          name="row-radio-buttons-group"
+          style={{ marginLeft: '30px', width: '190px' }}
+          value={ticketlistSelectedTimeFormat}
+          onChange={(e) => {
+            ticketlistsetSelectedTimeFormat(e.target.value);
+          }}
+        >
+          <FormControlLabel value="12hr" control={<Radio />} label="12 hrs" />
+          <FormControlLabel value="24hr" control={<Radio />} label="24 hrs" />
+        </RadioGroup>
           </Stack>
         )}
          {scratchTicketLoading && (
@@ -336,6 +502,7 @@ function App() {
                 <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '550px', textAlign: 'center' }}>User Name</TableCell>
                 <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '550px', textAlign: 'center' }}>Ticket Type</TableCell>
                 <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '550px', textAlign: 'center' }}>Ticket ID</TableCell>
+                <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '550px', textAlign: 'center' }}>Device ID</TableCell>
                 <TableCell style={{ fontWeight: 'bold', fontSize: '1.5em', width: '550px', textAlign: 'center' }}>Validated Time</TableCell>
               </TableRow>
             </TableHead>
@@ -348,7 +515,10 @@ function App() {
                   <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{ticket.username}</TableCell>
                   <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{ticket.ticket_type}</TableCell>
                   <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{ticket.ticket_id}</TableCell>
-                  <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{ticket.now_time}</TableCell>
+                  <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{ticket.device_id}</TableCell>
+                  <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>
+                      {ticketlistFormatTime(ticket.now_time)}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -475,7 +645,7 @@ function App() {
         <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Device version</TableCell>
         <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Ble power</TableCell>
         <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Ble minor</TableCell>
-        <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Validation id</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Last seen(IST)</TableCell>
         <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Start time</TableCell>
         <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Last in time</TableCell>
         <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Running status</TableCell>
@@ -503,7 +673,9 @@ function App() {
               <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.firmwareVersion}</TableCell>
               <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.bleTxpower}</TableCell>
               <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.bleMinor}</TableCell>
-              <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.validationTopic}</TableCell>
+              <TableCell style={{ fontSize: '1.0em', textAlign: 'center', color: isLastSeenBelow5Minutes(item.timestamp) ? 'green' : 'inherit', fontWeight: isLastSeenBelow5Minutes(item.timestamp) ? 'bold' : 'normal' }}>
+                {calculateTimeDifference(item.timestamp)} ago
+              </TableCell>
               <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>
                 {new Date(startingTime.getTime() + (5 * 60 + 30) * 60 * 1000).toLocaleString('en-US', {
                   year: 'numeric',
@@ -527,9 +699,9 @@ function App() {
                 })}
               </TableCell>
               <TableCell style={{ fontSize: '1.0em', textAlign: 'center', color: 'inherit', fontWeight: 'normal' }}>
-              {isNaN(hours) || isNaN(minutes) || isNaN(seconds)
-                ? 'N/A'
-                : `${hours}h ${minutes}m ${seconds}s`}
+              {isNaN(hours) || isNaN(minutes) || isNaN(seconds) || (hours === 0 && minutes === 0 && seconds === 0)
+              ? 'N/A'
+              : `${hours}h ${minutes}m ${seconds}s`}
               </TableCell>
             </TableRow>
           );
@@ -539,6 +711,37 @@ function App() {
 </TableContainer>
     </div>
   )}
+  </>
+)}{selectedButton === 'Validator Settings' && (
+  <>
+    {/* Dropdown for Timezone selection */}
+    <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" marginTop="2%">
+            <TextField
+              label="Device ID"
+              variant="outlined"
+              size="small"
+              style={{ width: '200px' }}
+              value={searchedDeviceId}
+              onChange={(e) => setSearchedDeviceId(e.target.value)}
+            />
+            <Button variant="contained" onClick={searchDeviceId}>
+              <SearchIcon />
+            </Button>
+          </Stack>
+          {isSearchingDeviceId ? (
+            <div style={{ marginTop: '20px', textAlign: 'center' }}>
+              <CircularProgress style={{ marginTop: '20px' }} />
+            </div>
+          ) : searchDeviceIdResponse && searchDeviceIdResponse.message === "Not device found" ? (
+            <Alert severity="info">
+              <AlertTitle>Info</AlertTitle>
+              No data found for this device. Check your device id or it might be a new device.
+            </Alert>
+          ) : searchDeviceIdResponse && (
+            <div style={{ textAlign: 'center', fontWeight: 'bold', color: 'blue' }}>
+            BLE Configurations
+          </div>
+          )}
   </>
 )}
         

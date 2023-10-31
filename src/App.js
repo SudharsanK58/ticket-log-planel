@@ -23,6 +23,15 @@ import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Paper from '@mui/material/Paper';
+import SendIcon from '@mui/icons-material/Send';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import WifiIcon from '@mui/icons-material/Wifi';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 
 function App() {
@@ -46,6 +55,13 @@ function App() {
   const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const [ticketlistSelectedTimeZone, ticketlistsetSelectedTimeZone] = useState('IST'); // Define ticketlistSelectedTimeZone and ticketlistsetSelectedTimeZone
   const [ticketlistSelectedTimeFormat, ticketlistsetSelectedTimeFormat] = useState('12hr'); // Updated state variable
+  const [validatorSettingsSelectedButton, setValidatorSettingsSelectedButton] = useState('');
+  const [validatorSettingsSearchedDeviceId, setValidatorSettingsSearchedDeviceId] = useState('');
+  const [validatorSettingsApiResponse, setValidatorSettingsApiResponse] = useState(null);
+  const [validatorSettingsApiLoading, setValidatorSettingsApiLoading] = useState(false);
+  const [deviceConfigDataArray, setDeviceConfigDataArray] = useState([]);
+  
+
 
   
   const redBackgroundRowStyle = {
@@ -79,6 +95,41 @@ function App() {
       return `${hours} hrs`;
     }
   }
+  
+  const validatorSettingsCallApi = () => {
+    setValidatorSettingsApiLoading(true);
+  
+    fetch('https://mdot.zed-admin.com/api/GetAvailableDevices')
+      .then((validatorSettingsResponse) => validatorSettingsResponse.json())
+      .then((validatorSettingsData) => {
+        console.log('Validator Settings API Response:', validatorSettingsData);
+        setValidatorSettingsApiResponse(validatorSettingsData);
+  
+        // Create an array of promises for fetching device configs
+        const deviceConfigPromises = validatorSettingsData.deviceId.map((deviceId) => {
+          const deviceConfigApiUrl = `https://mdot.zed-admin.com/api/GetDeviceConfig/${deviceId}`;
+          return fetch(deviceConfigApiUrl)
+            .then((validatorSettingsDeviceConfigResponse) => validatorSettingsDeviceConfigResponse.json())
+            .catch((error) => {
+              console.error(`Error fetching device config for ${deviceId}:`, error);
+              return null;
+            });
+        });
+  
+        // Wait for all promises to resolve
+        Promise.all(deviceConfigPromises)
+          .then((deviceConfigDataArray) => {
+            setValidatorSettingsApiLoading(false);
+            console.log('All device config data received:', deviceConfigDataArray);
+            setDeviceConfigDataArray(deviceConfigDataArray);
+          });
+      })
+      .catch((error) => {
+        console.error('Validator Settings API Error:', error);
+        setValidatorSettingsApiLoading(false);
+      });
+  };
+  
   
   const handleButtonClick = (buttonText) => {
     if (selectedButton !== buttonText) {
@@ -289,6 +340,10 @@ function App() {
     if (selectedButton === 'Validator Status') {
       // When switching back to "Ticket List" button, load data
       fetchDeviceStatusData()
+    }
+    if (selectedButton === 'Validator Settings') {
+      // When switching back to "Ticket List" button, load data
+      validatorSettingsCallApi()
     }
   }, [selectedButton, selectedCardToken]);
   
@@ -716,32 +771,77 @@ function App() {
   <>
     {/* Dropdown for Timezone selection */}
     <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" marginTop="2%">
-            <TextField
-              label="Device ID"
-              variant="outlined"
-              size="small"
-              style={{ width: '200px' }}
-              value={searchedDeviceId}
-              onChange={(e) => setSearchedDeviceId(e.target.value)}
-            />
-            <Button variant="contained" onClick={searchDeviceId}>
-              <SearchIcon />
-            </Button>
-          </Stack>
-          {isSearchingDeviceId ? (
-            <div style={{ marginTop: '20px', textAlign: 'center' }}>
-              <CircularProgress style={{ marginTop: '20px' }} />
-            </div>
-          ) : searchDeviceIdResponse && searchDeviceIdResponse.message === "Not device found" ? (
-            <Alert severity="info">
-              <AlertTitle>Info</AlertTitle>
-              No data found for this device. Check your device id or it might be a new device.
-            </Alert>
-          ) : searchDeviceIdResponse && (
-            <div style={{ textAlign: 'center', fontWeight: 'bold', color: 'blue' }}>
-            BLE Configurations
-          </div>
-          )}
+      <TextField
+        label="Device ID"
+        variant="outlined"
+        size="small"
+        style={{ width: '200px' }}
+        onChange={(e) => setSearchedDeviceId(e.target.value)}
+      />
+      <Button variant="contained" onClick={searchDeviceId}>
+        <SearchIcon />
+      </Button>
+    </Stack>
+    {validatorSettingsApiLoading ? (
+      <div style={{ marginTop: '20px', textAlign: 'center' }}>
+        <CircularProgress style={{ marginTop: '20px' }} />
+      </div>
+    ) : (
+<TableContainer style={{ marginTop: '20px', overflow: 'auto', justifyContent: 'center', alignItems: 'center' }}>
+    {validatorSettingsApiLoading ? (
+      <CircularProgress />
+    ) : validatorSettingsApiResponse ? (
+      <Table>
+        <TableHead>
+          <TableRow>
+          <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Device ID</TableCell>
+          <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Ble TxPower</TableCell>
+          <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Ibeacon Minor</TableCell>
+          <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>device Mode</TableCell>
+          <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Action</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {validatorSettingsApiResponse.deviceId.map((deviceId) => {
+            const deviceConfigData = deviceConfigDataArray.find((data) => data.deviceId === deviceId);
+            let deviceMode = 'Invalid Data';
+
+            if (deviceConfigData) {
+              const deviceTicketTelematricHybridMode = deviceConfigData?.gps?.deviceTicketTelematricHybridMode;
+              if (deviceTicketTelematricHybridMode === 1) {
+                deviceMode = 'GPS mode';
+              } else if (deviceTicketTelematricHybridMode === 0) {
+                deviceMode = 'Ticket mode';
+              } else if (deviceTicketTelematricHybridMode === 2) {
+                deviceMode = 'Hybrid mode';
+              }
+            }
+            return (
+              <TableRow key={deviceId}>
+                <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{deviceId}</TableCell>
+                <TableCell style={{ fontSize: '1.0em',textAlign: 'center' }}>{deviceConfigData?.ble?.bleTxPower}</TableCell>
+                <TableCell style={{ fontSize: '1.0em',  textAlign: 'center' }}>{deviceConfigData?.ble?.ibeaconMinor}</TableCell>
+                <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{deviceMode}</TableCell>
+                <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>
+                <Button variant="contained" style={{ marginRight: '15px' }} endIcon={<EditIcon />}>
+                  EDIT
+                </Button>
+                <Button variant="contained" style={{ marginRight: '15px' }} endIcon={<WifiIcon />}>
+                  WIFI
+                </Button>
+                <Button variant="contained" style={{ marginRight: '15px' }} color="error" startIcon={<DeleteIcon />}>
+                  Delete
+                </Button>
+              </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    ) : null}
+  </TableContainer>
+    )}
+    {}
   </>
 )}
         

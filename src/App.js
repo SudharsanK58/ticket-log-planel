@@ -60,8 +60,53 @@ function App() {
   const [validatorSettingsApiResponse, setValidatorSettingsApiResponse] = useState(null);
   const [validatorSettingsApiLoading, setValidatorSettingsApiLoading] = useState(false);
   const [deviceConfigDataArray, setDeviceConfigDataArray] = useState([]);
-  
+  const [validatorSettingSelectedDeviceId, setValidatorSettingSelectedDeviceId] = useState(null);
+  const [validatorSettingConfirmationCode, setValidatorSettingConfirmationCode] = useState('');
 
+  const handleValidatorSettingDelete = async (deviceId) => {
+    // Prompt the user for a confirmation code
+    const enteredCode = window.prompt('Please enter the confirmation code:');
+
+    // Check if the entered code matches the expected code
+    if (enteredCode === '1223') {
+      const confirmation = window.confirm(`Are you sure you want to delete the device with ID: ${deviceId}?`);
+
+      if (confirmation) {
+        try {
+          // Set loading to true while making the API call
+          setValidatorSettingsApiLoading(true);
+
+          // Make the API call to delete the device
+          const response = await fetch(`https://mdot.zed-admin.com/api/DeleteDeviceConfig/${deviceId}`, {
+            method: 'DELETE', // or 'POST' based on your API
+            // Add headers if needed
+          });
+
+          // Check if the response is successful
+          if (response.ok) {
+            const result = await response.json();
+            // Handle the API response as needed
+            console.log(result.message); // Log the message or take other actions
+          } else {
+            // Handle errors if the response is not successful
+            console.error('Error deleting device:', response.statusText);
+            setValidatorSettingsApiLoading(false);
+          }
+        } catch (error) {
+          // Handle any network or other errors
+          console.error('Error deleting device:', error.message);
+          setValidatorSettingsApiLoading(false);
+        } finally {
+          // Set loading back to false after the API call completes
+          // Call the function at the end
+          validatorSettingsCallApi();
+        }
+      }
+    } else {
+      // Notify the user that the code is incorrect
+      alert('Incorrect confirmation code. Deletion canceled.');
+    }
+  };
 
   
   const redBackgroundRowStyle = {
@@ -840,7 +885,7 @@ function App() {
 )}{selectedButton === 'Validator Settings' && (
   <>
     {/* Dropdown for Timezone selection */}
-    <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" marginTop="2%">
+    {/* <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" marginTop="2%">
       <TextField
         label="Device ID"
         variant="outlined"
@@ -851,7 +896,7 @@ function App() {
       <Button variant="contained" onClick={searchDeviceId}>
         <SearchIcon />
       </Button>
-    </Stack>
+    </Stack> */}
     {validatorSettingsApiLoading ? (
       <div style={{ marginTop: '20px', textAlign: 'center' }}>
         <CircularProgress style={{ marginTop: '20px' }} />
@@ -899,7 +944,13 @@ function App() {
                 <Button variant="contained" style={{ marginRight: '15px' }} endIcon={<WifiIcon />}>
                   WIFI
                 </Button>
-                <Button variant="contained" style={{ marginRight: '15px' }} color="error" startIcon={<DeleteIcon />}>
+                <Button
+                  variant="contained"
+                  style={{ marginRight: '15px' }}
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={() => handleValidatorSettingDelete(deviceId)}
+                >
                   Delete
                 </Button>
               </TableCell>

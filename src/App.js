@@ -145,11 +145,15 @@ function App() {
     }
   };
   const cards = [
-    { name: "24-device", token: "98:CD:AC:51:4A:BC" },
-    { name: "35-device", token: "98:CD:AC:51:4A:E8" },
-    { name: "48-device", token: "98:CD:AC:A0:01:48" },
-    { name: "49-device", token: "98:CD:AC:A0:01:49" },
-    { name: "201-device", token: "04:e9:e5:15:70:91" }
+    { name: "24-Office-Device", token: "98:CD:AC:51:4A:BC" },
+    { name: "51-Office-Device", token: "98:CD:AC:A0:01:51" },
+    { name: "48-BJCT-Device", token: "98:CD:AC:A0:01:48" },
+    { name: "49-BJCT-Device", token: "98:CD:AC:A0:01:49" },
+    { name: "70-US/CAN-Device", token: "04:E9:E5:15:70:AC" },
+    { name: "75-US/CAN-Device", token: "04:E9:E5:15:70:8B" },
+    { name: "201-Office-Device", token: "04:e9:e5:15:70:91" },
+    { name: "202-Office-Device", token: "04:e9:e5:14:90:26" },
+    { name: "203-Office-Device", token: "04:e9:e5:15:6f:f1" }
   ];
   const [selectedCardToken, setSelectedCardToken] = useState(cards[0].token); 
 
@@ -297,8 +301,54 @@ function App() {
   return formattedTime;
   };
   
-  
-  
+  const ticketlistFormatTimeUTC = (timeString) => {
+    // Parse the UTC time string
+    const date = new Date(timeString);
+
+    
+
+    if (ticketlistSelectedTimeZone === 'EST') {
+        date.setHours(date.getHours() - 5);
+        date.setMinutes(date.getMinutes());
+    } else if (ticketlistSelectedTimeZone === 'PST') {
+        date.setHours(date.getHours() - 8);
+        date.setMinutes(date.getMinutes());
+    } else if (ticketlistSelectedTimeZone === 'CST') {
+        date.setHours(date.getHours() - 6);
+        date.setMinutes(date.getMinutes());
+    } else if (ticketlistSelectedTimeZone === 'MST') {
+        date.setHours(date.getHours() - 7);
+        date.setMinutes(date.getMinutes());
+    }else if (ticketlistSelectedTimeZone === 'IST') {
+      date.setHours(date.getHours() + 5);
+      date.setMinutes(date.getMinutes() + 30);
+  }
+
+    // Check if the date has gone to the previous day
+    const day = date.getUTCDate();
+    if (day !== date.getUTCDate()) {
+        date.setUTCDate(day - 1);
+    }
+
+    // Format the date and time based on the selected time format
+    const options = {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour12: ticketlistSelectedTimeFormat === '12hr',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    };
+
+    const formattedTime = date.toLocaleString('en-US', options);
+
+    if (ticketlistSelectedTimeFormat === '24hr') {
+        return formattedTime;
+    }
+
+    return formattedTime;
+};
   
 
   
@@ -316,7 +366,12 @@ function App() {
       apiUrl = 'https://zig-trip.com/ConfigAPIV2/Getclientconfig?Pin=ZIG19';
     } else if (androidOrIOS === 'IOS' && validator === 'MODOT') {
       apiUrl = 'https://zig-trip.com/ConfigAPIV2IOS/Getclientconfig?Pin=ZIG19';
+    }else if (androidOrIOS === 'Android' && validator === 'ZIG') {
+      apiUrl = 'https://zig-web.com/configapiv2/Getclientconfig?Pin=ZIG19';
+    } else if (androidOrIOS === 'IOS' && validator === 'ZIG') {
+      apiUrl = 'https://zig-web.com/configapiv2ios/Getclientconfig?Pin=ZIG19';
     }
+    
 
     if (apiUrl) {
       axios.get(apiUrl)
@@ -601,6 +656,7 @@ function App() {
                 >
                   <MenuItem value="Ecolane">Ecolane</MenuItem>
                   <MenuItem value="MODOT">MODOT</MenuItem>
+                  <MenuItem value="ZIG">ZIG</MenuItem> 
                 </Select>
               </FormControl>
               <Button variant="contained" onClick={handleGetDetailsClick}>
@@ -634,15 +690,18 @@ function App() {
               device => device.Macaddress === macAddressItem.Macaddress
             );
             if (existingDevice) {
-              if (!existingDevice.ClientNames.includes(client.Clientname)) {
-                existingDevice.ClientNames.push(client.Clientname);
+              const clientId = { Id: client.Id, ClientName: client.Clientname };
+              // Use a Set to ensure unique client names
+              const uniqueClientNames = new Set(existingDevice.ClientNames.map(item => item.ClientName));
+              if (!uniqueClientNames.has(client.Clientname)) {
+                existingDevice.ClientNames.push(clientId);
               }
             } else {
               uniqueDevices.push({
                 Macaddress: macAddressItem.Macaddress,
                 Major: macAddressItem.Major,
                 Minor: macAddressItem.Minor,
-                ClientNames: [client.Clientname],
+                ClientNames: [{ Id: client.Id, ClientName: client.Clientname }],
               });
             }
           });
@@ -652,7 +711,14 @@ function App() {
             <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{device.Macaddress}</TableCell>
             <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{device.Major}</TableCell>
             <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{device.Minor}</TableCell>
-            <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{device.ClientNames.join(', ')}</TableCell>
+            <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>
+            {device.ClientNames.map((client, index) => (
+              <span key={index}>
+                {client.Id}: {client.ClientName}
+                {index < device.ClientNames.length - 1 && ', '}
+              </span>
+            ))}
+          </TableCell>
           </TableRow>
         ))
       )}
@@ -668,15 +734,35 @@ function App() {
     {/* Dropdown for Timezone selection */}
     <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" marginTop="2%">
     <FormControl variant="outlined" size="small" style={{ marginRight: '10px' }}>
-      {/* <Select
-        value={selectedTimezone}
-        onChange={(e) => setSelectedTimezone(e.target.value)}
-        style={{ width: '250px' }}
-      >
-        <MenuItem value="IST">Indian Standard Time</MenuItem>
-        <MenuItem value="EST">Eastern Standard Time</MenuItem>
-      </Select> */}
+    <Select
+      labelId="timezone-label"
+      value={ticketlistSelectedTimeZone}
+      onChange={(e) => {
+        ticketlistsetSelectedTimeZone(e.target.value);
+        // Handle timezone change here
+      }}
+      style={{ marginLeft: '10px', width: '100px' }}
+    >
+      <MenuItem value="IST">IST</MenuItem>
+      <MenuItem value="EST">EST</MenuItem>
+      <MenuItem value="PST">PST</MenuItem>
+      <MenuItem value="CST">CST</MenuItem>
+      <MenuItem value="MST">MST</MenuItem>
+    </Select>
     </FormControl>
+    <RadioGroup
+      row
+      aria-labelledby="demo-row-radio-buttons-group-label"
+      name="row-radio-buttons-group"
+      style={{ marginLeft: '30px', width: '190px' }}
+      value={ticketlistSelectedTimeFormat}
+      onChange={(e) => {
+        ticketlistsetSelectedTimeFormat(e.target.value);
+      }}
+    >
+      <FormControlLabel value="12hr" control={<Radio />} label="12 hrs" />
+      <FormControlLabel value="24hr" control={<Radio />} label="24 hrs" />
+    </RadioGroup>
     {/* Reload button */}
     <Button variant="contained" onClick = {fetchDeviceStatusData}>
       Reload
@@ -731,27 +817,11 @@ function App() {
               <TableCell style={{ fontSize: '1.0em', textAlign: 'center', color: isLastSeenBelow5Minutes(item.timestamp) ? 'green' : 'inherit', fontWeight: isLastSeenBelow5Minutes(item.timestamp) ? 'bold' : 'normal' }}>
                 {calculateTimeDifference(item.timestamp)} ago
               </TableCell>
-              <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>
-                {new Date(startingTime.getTime() + (5 * 60 + 30) * 60 * 1000).toLocaleString('en-US', {
-                  year: 'numeric',
-                  month: 'numeric',
-                  day: 'numeric',
-                  hour: 'numeric',
-                  minute: 'numeric',
-                  second: 'numeric',
-                  hour12: true,
-                })}
+              <TableCell style={{ fontSize: '1.0em', textAlign: 'center', color: isLastSeenBelow5Minutes(item.timestamp) ? 'green' : 'inherit', fontWeight: isLastSeenBelow5Minutes(item.timestamp) ? 'bold' : 'normal' }}>
+                {ticketlistFormatTimeUTC(item.StartingTime)}
               </TableCell>
-              <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>
-                {new Date(lastInTime.getTime() + (5 * 60 + 30) * 60 * 1000).toLocaleString('en-US', {
-                  year: 'numeric',
-                  month: 'numeric',
-                  day: 'numeric',
-                  hour: 'numeric',
-                  minute: 'numeric',
-                  second: 'numeric',
-                  hour12: true,
-                })}
+              <TableCell style={{ fontSize: '1.0em', textAlign: 'center', color: isLastSeenBelow5Minutes(item.timestamp) ? 'green' : 'inherit', fontWeight: isLastSeenBelow5Minutes(item.timestamp) ? 'bold' : 'normal' }}>
+                {ticketlistFormatTimeUTC(item.timestamp)}
               </TableCell>
               <TableCell style={{ fontSize: '1.0em', textAlign: 'center', color: 'inherit', fontWeight: 'normal' }}>
               {isNaN(hours) || isNaN(minutes) || isNaN(seconds) || (hours === 0 && minutes === 0 && seconds === 0)

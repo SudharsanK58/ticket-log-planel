@@ -32,6 +32,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import AddIcon from '@mui/icons-material/Add';
 
 
 function App() {
@@ -62,6 +63,83 @@ function App() {
   const [deviceConfigDataArray, setDeviceConfigDataArray] = useState([]);
   const [validatorSettingSelectedDeviceId, setValidatorSettingSelectedDeviceId] = useState(null);
   const [validatorSettingConfirmationCode, setValidatorSettingConfirmationCode] = useState('');
+
+  const vaildatorSettingAddDevice = () => {
+    const enteredDeviceId = window.prompt('Enter Device ID:');
+    const enteredIbeaconMinor = window.prompt('Enter iBeacon Minor:');
+
+    if (enteredDeviceId && enteredIbeaconMinor) {
+      setValidatorSettingsApiLoading(true);
+      // Make the API call with the entered values
+      fetch('https://mdot.zed-admin.com/api/AddDeviceConfig', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          deviceId: enteredDeviceId,
+          blename: "BIBO 1.1 A",
+          bleTxPower: 4,
+          bleDfuMode: false,
+          ibeaconMajor: 100,
+          ibeaconMinor: parseInt(enteredIbeaconMinor, 10),
+          bleIbeaconMode: true,
+          bleConnectMode: true,
+          deviceTopic: `${enteredDeviceId}/device`,
+          deviceReactTopic: `${enteredDeviceId}/react`,
+          deviceLogTopic: `${enteredDeviceId}/log`,
+          validTiceketDelay: 1500,
+          invalidTicketDelay: 300,
+          mqttLogDelay: 10000,
+          validSpecialTiceketDelay: 10000,
+          wifiLogPublishInterval: 10000,
+          gsmLogPublishInterval: 20000,
+          sendOnlyGpsLog: true,
+          totalDeviceLog: true,
+          multipleTicketDelay: 1000,
+          specialTicketType: 1,
+          buzzerEnable: true,
+          enableMultipleLights: false,
+          ssid1: "Zed_34",
+          password1: "Wireless4U",
+          ssid2: "your_ssid_2",
+          password2: "your_password_2",
+          firmwareVersion: "your_firmware_version",
+          firmwareUrl: "your_firmware_url",
+          deviceTicketTelematricHybridMode: 2,
+          requiredNosatellites: 4,
+          requiredSpeedLimit: 5.0,
+          startDeviceMode: 1,
+          displayLastTicketScreen: true,
+          enableToggleDisplayLines: true,
+          homepageHeadingStatus1: "READY ",
+          homepageHeadingStatus2: "WAIT",
+          homepageHeadingStatus3: "OFFLINE",
+          homepageHeadingStatus4: "CARD VALIDATED",
+          storeTicketDataList: false,
+          storeTicketDataListCout: 2,
+          sendOutCardData : false,
+          sendOutCardDataCount: 5,
+          bleCardTopic: `${enteredDeviceId}/cards`,
+          bleScanMode: true,
+          bleCardScanRssi: -55
+        }),
+      })
+        .then(response => response.json())
+        .then(data => {
+          // Handle the API response as needed
+          console.log(data);
+          validatorSettingsCallApi();
+          alert('Device added successfully.');
+        })
+        .catch(error => {
+          // Handle errors
+          console.error('Error adding device:', error);
+          validatorSettingsCallApi();
+          alert('Error adding device:', error);
+        });
+    }
+  };
 
   const handleValidatorSettingDelete = async (deviceId) => {
     // Prompt the user for a confirmation code
@@ -885,18 +963,21 @@ function App() {
 )}{selectedButton === 'Validator Settings' && (
   <>
     {/* Dropdown for Timezone selection */}
-    {/* <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" marginTop="2%">
-      <TextField
+    <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" marginTop="2%">
+      {/* <TextField
         label="Device ID"
         variant="outlined"
         size="small"
         style={{ width: '200px' }}
         onChange={(e) => setSearchedDeviceId(e.target.value)}
-      />
-      <Button variant="contained" onClick={searchDeviceId}>
-        <SearchIcon />
+      /> */}
+      <Button variant="contained" color="success" startIcon={<AddIcon />}onClick={vaildatorSettingAddDevice}>
+        New device
       </Button>
-    </Stack> */}
+      <Button variant="contained" onClick = {validatorSettingsCallApi}>
+        Reload
+      </Button>
+    </Stack>
     {validatorSettingsApiLoading ? (
       <div style={{ marginTop: '20px', textAlign: 'center' }}>
         <CircularProgress style={{ marginTop: '20px' }} />

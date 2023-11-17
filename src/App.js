@@ -33,7 +33,8 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import AddIcon from '@mui/icons-material/Add';
-
+import Chip from '@mui/material/Chip';
+import CellTowerIcon from '@mui/icons-material/CellTower';
 
 function App() {
   
@@ -534,16 +535,16 @@ function App() {
     
 
     if (ticketlistSelectedTimeZone === 'EST') {
-        date.setHours(date.getHours() - 5);
+        date.setHours(date.getHours() - 4);
         date.setMinutes(date.getMinutes());
     } else if (ticketlistSelectedTimeZone === 'PST') {
-        date.setHours(date.getHours() - 8);
+        date.setHours(date.getHours() - 7);
         date.setMinutes(date.getMinutes());
     } else if (ticketlistSelectedTimeZone === 'CST') {
-        date.setHours(date.getHours() - 6);
+        date.setHours(date.getHours() - 5);
         date.setMinutes(date.getMinutes());
     } else if (ticketlistSelectedTimeZone === 'MST') {
-        date.setHours(date.getHours() - 7);
+        date.setHours(date.getHours() - 6);
         date.setMinutes(date.getMinutes());
     }else if (ticketlistSelectedTimeZone === 'IST') {
       date.setHours(date.getHours() + 5);
@@ -1009,7 +1010,7 @@ function App() {
     <TableHead>
       <TableRow>
         <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Device ID</TableCell>
-        <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Device version</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Network</TableCell>
         <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Ble power</TableCell>
         <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Ble minor</TableCell>
         <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Last seen(IST)</TableCell>
@@ -1037,7 +1038,25 @@ function App() {
           return (
             <TableRow key={index}>
               <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.deviceId}</TableCell>
-              <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.firmwareVersion}</TableCell>
+              {item.networkConnection === 2 ? (
+                <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>
+                  <Chip
+                    icon={<WifiIcon />}
+                    label={item.networkName}
+                    color="primary"
+                  />
+                </TableCell>
+              ) : item.networkConnection === 1 ? (
+                <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>
+                  <Chip
+                    icon={<CellTowerIcon />}
+                    label={item.networkName}
+                    color="secondary"  
+                  />
+                </TableCell>
+              ) : (
+                <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.networkConnection}</TableCell>
+              )}
               <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.bleTxpower}</TableCell>
               <TableCell style={{ fontSize: '1.0em', textAlign: 'center' }}>{item.bleMinor}</TableCell>
               <TableCell style={{ fontSize: '1.0em', textAlign: 'center', color: isLastSeenBelow5Minutes(item.timestamp) ? 'green' : 'inherit', fontWeight: isLastSeenBelow5Minutes(item.timestamp) ? 'bold' : 'normal' }}>

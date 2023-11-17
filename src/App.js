@@ -64,7 +64,105 @@ function App() {
   const [validatorSettingSelectedDeviceId, setValidatorSettingSelectedDeviceId] = useState(null);
   const [validatorSettingConfirmationCode, setValidatorSettingConfirmationCode] = useState('');
 
+  const validatorSettingWifiButtonClick  = async (deviceId) => {
+    try {
+      // Make the API call to get device configuration
+      const response = await fetch(`https://mdot.zed-admin.com/api/GetDeviceConfig/${deviceId}`);
+      
+      // Check if the response is successful
+      if (response.ok) {
+        const validatorSettingDeviceConfig = await response.json();
+        // Extract SSID and password
+        const extractedSsid = validatorSettingDeviceConfig.wifi.primaryWifi.ssid;
+        const extractedPassword = validatorSettingDeviceConfig.wifi.primaryWifi.password;
+
+        // Prompt the user for editing SSID and password
+        const editedSsid = window.prompt('Edit SSID:', extractedSsid);
+        const editedPassword = window.prompt('Edit Password:', extractedPassword);
+
+        // Check if the user clicked "Cancel" in the prompt
+        if (editedSsid === null || editedPassword === null) {
+          return;
+        }
+        setValidatorSettingsApiLoading(true);
+        // Make the API call to update device configuration
+        const updateResponse = await fetch('https://mdot.zed-admin.com/api/UpdateDeviceConfig', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            deviceId: deviceId,
+            ssid1: editedSsid,
+            password1: editedPassword,
+            blename: validatorSettingDeviceConfig.ble.blename,
+            bleTxPower: validatorSettingDeviceConfig.ble.bleTxPower,
+            bleDfuMode: validatorSettingDeviceConfig.ble.bleDfuMode,
+            ibeaconMajor: validatorSettingDeviceConfig.ble.ibeaconMajor,
+            ibeaconMinor: validatorSettingDeviceConfig.ble.ibeaconMinor,
+            bleIbeaconMode: validatorSettingDeviceConfig.ble.bleIbeaconMode,
+            bleConnectMode: validatorSettingDeviceConfig.ble.bleConnectMode,
+            deviceTopic: validatorSettingDeviceConfig.mqtt.deviceTopic,
+            deviceReactTopic: validatorSettingDeviceConfig.mqtt.deviceReactTopic,
+            deviceLogTopic: validatorSettingDeviceConfig.mqtt.deviceLogTopic,
+            validTiceketDelay: validatorSettingDeviceConfig.validation.validTiceketDelay,
+            invalidTicketDelay: validatorSettingDeviceConfig.validation.invalidTicketDelay,
+            mqttLogDelay: validatorSettingDeviceConfig.mqtt.mqttLogDelay,
+            validSpecialTiceketDelay: validatorSettingDeviceConfig.validation.validSpecialTiceketDelay,
+            wifiLogPublishInterval: validatorSettingDeviceConfig.mqtt.wifiLogPublishInterval,
+            gsmLogPublishInterval: validatorSettingDeviceConfig.mqtt.gsmLogPublishInterval,
+            sendOnlyGpsLog: validatorSettingDeviceConfig.mqtt.sendOnlyGpsLog,
+            totalDeviceLog: validatorSettingDeviceConfig.mqtt.totalDeviceLog,
+            multipleTicketDelay: validatorSettingDeviceConfig.validation.multipleTicketDelay,
+            specialTicketType: validatorSettingDeviceConfig.validation.specialTicketType,
+            buzzerEnable: validatorSettingDeviceConfig.validation.buzzerEnable,
+            enableMultipleLights: validatorSettingDeviceConfig.validation.enableMultipleLights,
+            ssid2: validatorSettingDeviceConfig.wifi.secondaryWifi.ssid,
+            password2: validatorSettingDeviceConfig.wifi.secondaryWifi.password,
+            firmwareVersion: validatorSettingDeviceConfig.firmware.firmwareVersion,
+            firmwareUrl: validatorSettingDeviceConfig.firmware.firmwareUrl,
+            deviceTicketTelematricHybridMode: validatorSettingDeviceConfig.gps.deviceTicketTelematricHybridMode,
+            requiredNosatellites: validatorSettingDeviceConfig.gps.requiredNosatellites,
+            requiredSpeedLimit: validatorSettingDeviceConfig.gps.requiredSpeedLimit,
+            startDeviceMode: validatorSettingDeviceConfig.validation.startDeviceMode,
+            displayLastTicketScreen: validatorSettingDeviceConfig.validation.displayLastTicketScreen,
+            enableToggleDisplayLines: validatorSettingDeviceConfig.validation.enableToggleDisplayLines,
+            homepageHeadingStatus1: validatorSettingDeviceConfig.validation.homepageHeadingStatus1,
+            homepageHeadingStatus2: validatorSettingDeviceConfig.validation.homepageHeadingStatus2,
+            homepageHeadingStatus3: validatorSettingDeviceConfig.validation.homepageHeadingStatus3,
+            homepageHeadingStatus4: validatorSettingDeviceConfig.validation.homepageHeadingStatus4,
+            storeTicketDataList: validatorSettingDeviceConfig.validation.storeTicketDataList,
+            storeTicketDataListCout: validatorSettingDeviceConfig.validation.storeTicketDataListCout,
+            sendOutCardData : validatorSettingDeviceConfig.gps.sendOutCardData,
+            sendOutCardDataCount: validatorSettingDeviceConfig.gps.sendOutCardDataCount,
+            bleCardTopic: validatorSettingDeviceConfig.mqtt.bleCardTopic,
+            bleScanMode: validatorSettingDeviceConfig.ble.bleScanMode,
+            bleCardScanRssi: validatorSettingDeviceConfig.ble.bleCardScanRssi
+          }),
+        });
+
+        if (updateResponse.ok) {
+          // Handle successful update
+          console.log('Device configuration updated successfully!');
+          validatorSettingsCallApi();
+          alert('Wifi creds changed successfully.');
+        } else {
+          console.error('Error updating device configuration:', updateResponse.statusText);
+          alert('Error updating device configuration:', updateResponse.statusText);
+        }
+      } else {
+        console.error('Error fetching device configuration:', response.statusText);
+        alert('Error fetching device configuration:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching/updating device configuration:', error.message);
+      alert('Error fetching/updating device configuration:', error.message);
+    }
+  };
+
   const vaildatorSettingAddDevice = () => {
+    const enteredCode = window.prompt('Please enter the confirmation code:');
+    if (enteredCode === '1223') {
     const enteredDeviceId = window.prompt('Enter Device ID:');
     const enteredIbeaconMinor = window.prompt('Enter iBeacon Minor:');
 
@@ -121,7 +219,7 @@ function App() {
           sendOutCardData : false,
           sendOutCardDataCount: 5,
           bleCardTopic: `${enteredDeviceId}/cards`,
-          bleScanMode: true,
+          bleScanMode: false,
           bleCardScanRssi: -55
         }),
       })
@@ -139,6 +237,11 @@ function App() {
           alert('Error adding device:', error);
         });
     }
+    }else {
+      // Notify the user that the code is incorrect
+      alert('Incorrect confirmation code.');
+    }
+    
   };
 
   const handleValidatorSettingDelete = async (deviceId) => {
@@ -1022,7 +1125,12 @@ function App() {
                 <Button variant="contained" style={{ marginRight: '15px' }} endIcon={<EditIcon />}>
                   EDIT
                 </Button>
-                <Button variant="contained" style={{ marginRight: '15px' }} endIcon={<WifiIcon />}>
+                <Button
+                  variant="contained"
+                  style={{ marginRight: '15px' }}
+                  endIcon={<WifiIcon />}
+                  onClick={() => validatorSettingWifiButtonClick(deviceId)}
+                >
                   WIFI
                 </Button>
                 <Button

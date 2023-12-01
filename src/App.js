@@ -391,7 +391,7 @@ function App() {
         setDeviceStatusLoading(true);
   
         // Construct the API URL based on the selected timezone
-        const apiUrl = `http://mqtt.zusan.in:8080/device_log_data`;
+        const apiUrl = `http://mqtt.zusan.in:8001/device_log_data`;
   
         // Make the API request
         fetch(apiUrl)
@@ -431,7 +431,7 @@ function App() {
   const fetchData = (token) => {
     setLoading(true);
   
-    axios.get(`http://mqtt.zusan.in:8080/today_data_device_id/${token}`)
+    axios.get(`http://mqtt.zusan.in:8001/today_data_device_id/${token}`)
       .then(response => {
         setTickets(response.data);
         setLoading(false);
@@ -449,7 +449,7 @@ function App() {
     setScratchTicketLoading(true);
     setTickets([]);
 
-    axios.get(`http://mqtt.zusan.in:8080/today_data_ticket_id/${ticketId}`)
+    axios.get(`http://mqtt.zusan.in:8001/today_data_ticket_id/${ticketId}`)
       .then(response => {
         if (Array.isArray(response.data) && response.data.length > 0) {
           setTickets(response.data);
@@ -487,19 +487,19 @@ function App() {
     // Handle timezone differences
   if (ticketlistSelectedTimeZone === 'EST') {
     // IST is 9 hours and 30 minutes ahead of EST
-    date.setHours(date.getHours() - 9);
+    date.setHours(date.getHours() - 10);
     date.setMinutes(date.getMinutes() - 30);
   } else if (ticketlistSelectedTimeZone === 'PST') {
     // IST is 12 hours and 30 minutes ahead of PST
-    date.setHours(date.getHours() - 12);
+    date.setHours(date.getHours() - 13); 
     date.setMinutes(date.getMinutes() - 30);
   } else if (ticketlistSelectedTimeZone === 'CST') {
     // IST is 10 hours and 30 minutes ahead of CST
-    date.setHours(date.getHours() - 10);
+    date.setHours(date.getHours() - 11);
     date.setMinutes(date.getMinutes() - 30);
   } else if (ticketlistSelectedTimeZone === 'MST') {
     // IST is 11 hours and 30 minutes ahead of MST
-    date.setHours(date.getHours() - 11);
+    date.setHours(date.getHours() - 12);
     date.setMinutes(date.getMinutes() - 30);
   }
   

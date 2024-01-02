@@ -391,7 +391,7 @@ function App() {
         setDeviceStatusLoading(true);
   
         // Construct the API URL based on the selected timezone
-        const apiUrl = `http://mqtt.zusan.in:8001/device_log_data`;
+        const apiUrl = `http://3.144.9.52:8001/device_log_data`;
   
         // Make the API request
         fetch(apiUrl)
@@ -431,7 +431,7 @@ function App() {
   const fetchData = (token) => {
     setLoading(true);
   
-    axios.get(`http://mqtt.zusan.in:8001/today_data_device_id/${token}`)
+    axios.get(`http://3.144.9.52:8001/today_data_device_id/${token}`)
       .then(response => {
         setTickets(response.data);
         setLoading(false);
@@ -449,7 +449,7 @@ function App() {
     setScratchTicketLoading(true);
     setTickets([]);
 
-    axios.get(`http://mqtt.zusan.in:8001/today_data_ticket_id/${ticketId}`)
+    axios.get(`http://3.144.9.52:8001/today_data_ticket_id/${ticketId}`)
       .then(response => {
         if (Array.isArray(response.data) && response.data.length > 0) {
           setTickets(response.data);

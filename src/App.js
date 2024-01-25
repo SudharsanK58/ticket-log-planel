@@ -65,6 +65,32 @@ function App() {
   const [validatorSettingSelectedDeviceId, setValidatorSettingSelectedDeviceId] = useState(null);
   const [validatorSettingConfirmationCode, setValidatorSettingConfirmationCode] = useState('');
 
+  const handleButtonClick23 = (deviceId) => {
+    const apiUrl = 'http://54.89.246.64:8001/publish';
+    const payload = {
+      topic: `${deviceId}/nfc`,
+      message: '301',
+    };
+  
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+      .then(response => response.json())
+      .then(data => {
+        // Handle the API response if needed
+        console.log('API response:', data);
+      })
+      .catch(error => {
+        // Handle errors during API call
+        console.error('Error during API call:', error);
+      });
+  };
+  
+
   const validatorSettingWifiButtonClick  = async (deviceId) => {
     try {
       // Make the API call to get device configuration
@@ -1017,6 +1043,7 @@ function App() {
         <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Start time</TableCell>
         <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Last in time</TableCell>
         <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Running status</TableCell>
+        <TableCell style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center' }}>Actions</TableCell> {/* Add a new column for the button row */}
       </TableRow>
     </TableHead>
     <TableBody>
@@ -1072,6 +1099,10 @@ function App() {
               {isNaN(hours) || isNaN(minutes) || isNaN(seconds) || (hours === 0 && minutes === 0 && seconds === 0)
               ? 'N/A'
               : `${hours}h ${minutes}m ${seconds}s`}
+              </TableCell>
+              <TableCell style={{ fontSize: '1.0em', textAlign: 'center', color: 'inherit', fontWeight: 'normal' }}>
+                {/* Add your button row component or buttons here */}
+                <Button onClick={() => handleButtonClick23(item.deviceId)}>PING</Button>
               </TableCell>
             </TableRow>
           );

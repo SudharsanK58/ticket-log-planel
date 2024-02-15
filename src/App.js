@@ -45,7 +45,7 @@ function App() {
   const [scratchTicketLoading, setScratchTicketLoading] = useState(false);
   const [noDataFound, setNoDataFound] = useState(false);
   const [androidOrIOS, setAndroidOrIOS] = useState('Android'); // State for Android or iOS select
-  const [validator, setValidator] = useState('Ecolane'); // State for the Validator select
+  const [validator, setValidator] = useState('MODOT'); // State for the Validator select
   const [apiResponse, setApiResponse] = useState('');
   const [selectedTimezone, setSelectedTimezone] = useState('IST'); // Initialize with a default value if needed
   const [deviceStatusLoading, setDeviceStatusLoading] = useState(false);
@@ -630,9 +630,9 @@ function App() {
     } else if (androidOrIOS === 'IOS' && validator === 'Ecolane') {
       apiUrl = 'https://zig-app.com/ConfigAPIV2IOS/Getclientconfig?Pin=ZIG19';
     } else if (androidOrIOS === 'Android' && validator === 'MODOT') {
-      apiUrl = 'https://zig-trip.com/ConfigAPIV2/Getclientconfig?Pin=ZIG19';
+      apiUrl = 'https://zig-config.zed-admin.com/api/v1/Getclientconfig?pin=ZIG19';
     } else if (androidOrIOS === 'IOS' && validator === 'MODOT') {
-      apiUrl = 'https://zig-trip.com/ConfigAPIV2IOS/Getclientconfig?Pin=ZIG19';
+      apiUrl = 'https://zig-config.zed-admin.com/api/v1/Getclientconfig?pin=ZIG19';
     }else if (androidOrIOS === 'Android' && validator === 'ZIG') {
       apiUrl = 'https://zig-web.com/configapiv2/Getclientconfig?Pin=ZIG19';
     } else if (androidOrIOS === 'IOS' && validator === 'ZIG') {
@@ -921,9 +921,9 @@ function App() {
                   onChange={(e) => setValidator(e.target.value)}
                   style={{ width: '150px' }}
                 >
-                  <MenuItem value="Ecolane">Ecolane</MenuItem>
-                  <MenuItem value="MODOT">MODOT</MenuItem>
-                  <MenuItem value="ZIG">ZIG</MenuItem> 
+                  {/* <MenuItem value="Ecolane">Ecolane</MenuItem>
+                  <MenuItem value="MODOT">MODOT</MenuItem> */}
+                  <MenuItem value="MODOT">MODOT</MenuItem> 
                 </Select>
               </FormControl>
               <Button variant="contained" onClick={handleGetDetailsClick}>
@@ -1035,12 +1035,12 @@ function App() {
       Reload
     </Button>
 
-    <FormControl variant="outlined" size="small" style={{ margin: '10px' }}>
+    <FormControl variant="outlined" size="small" style={{ marginLeft: '30px',margin: '10px' }}>
       <Select
         labelId="client-label"
         value={selectedClient}
         onChange={(e) => setSelectedClient(e.target.value)}
-        style={{ width: '200px' }}
+        style={{ width: '250px' }}
       >
         {clientList.map((client, index) => (
           <MenuItem key={index} value={client}>

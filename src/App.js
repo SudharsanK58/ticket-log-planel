@@ -64,6 +64,7 @@ function App() {
   const [deviceConfigDataArray, setDeviceConfigDataArray] = useState([]);
   const [validatorSettingSelectedDeviceId, setValidatorSettingSelectedDeviceId] = useState(null);
   const [validatorSettingConfirmationCode, setValidatorSettingConfirmationCode] = useState('');
+  const [selectedClient, setSelectedClient] = useState('All Client Devices');
 
   const handleButtonClick23 = (deviceId) => {
     const apiUrl = 'http://54.89.246.64:8001/publish';
@@ -409,33 +410,46 @@ function App() {
     { name: "203-Office-Device", token: "04:e9:e5:15:6f:f1" }
   ];
   const [selectedCardToken, setSelectedCardToken] = useState(cards[0].token); 
-
+  const [clientList, setClientList] = useState([]);
     // Function to make the API call for device status
     const fetchDeviceStatusData = () => {
-      // Check if the "Validator Status" button is selected
       if (selectedButton === 'Validator Status') {
         setDeviceStatusLoading(true);
-  
-        // Construct the API URL based on the selected timezone
-        const apiUrl = `http://3.144.9.52:8001/device_log_data`;
-  
-        // Make the API request
+    
+        // Fetch clients
+        fetch('http://3.144.9.52:8001/clients')
+          .then((response) => response.json())
+          .then((data) => {
+            setClientList(data);
+          })
+          .catch((error) => {
+            console.error('Error fetching clients:', error);
+          });
+    
+        // Fetch MAC addresses based on the selected client
+        const clientQueryParam = selectedClient === 'All Client Devices' ? '' : `?client_name=${encodeURIComponent(selectedClient)}`;
+        const macAddressesUrl = `http://3.144.9.52:8001/macaddresses${clientQueryParam}`;
+        
+        // Fetch device data based on the selected client or use default API URL
+        const apiUrl = selectedClient === 'All Client Devices' ? 'http://3.144.9.52:8001/device_log_data' : macAddressesUrl;
+    
         fetch(apiUrl)
           .then((response) => response.json())
           .then((data) => {
             setDeviceStatusData(data);
             setDeviceStatusLoading(false);
-            // Log the apiResponse and loading status
             console.log('API Response:', data);
-            console.log('Loading Status:', deviceStatusLoading);
-            console.log(`User's time zone: ${userTimeZone}`);
           })
           .catch((error) => {
-            console.error('Error fetching device status data:', error);
+            console.error('Error fetching data:', error);
             setDeviceStatusLoading(false);
           });
       }
     };
+    useEffect(() => {
+      fetchDeviceStatusData();
+    }, [selectedClient]);
+    
     const searchDeviceId = () => {
       if (searchedDeviceId) {
         // Make the API request using the entered device ID
@@ -1020,6 +1034,22 @@ function App() {
     <Button variant="contained" onClick = {fetchDeviceStatusData}>
       Reload
     </Button>
+
+    <FormControl variant="outlined" size="small" style={{ margin: '10px' }}>
+      <Select
+        labelId="client-label"
+        value={selectedClient}
+        onChange={(e) => setSelectedClient(e.target.value)}
+        style={{ width: '200px' }}
+      >
+        {clientList.map((client, index) => (
+          <MenuItem key={index} value={client}>
+            {client}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+
     </Stack>
     
     {/* Rest of the code related to loading and displaying data */}
